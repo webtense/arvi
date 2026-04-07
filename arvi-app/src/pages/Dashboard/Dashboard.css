@@ -1,0 +1,202 @@
+.dashboard-header {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboard-header h2 {
+    font-size: 1.8rem;
+    margin-bottom: 0.25rem;
+    letter-spacing: -0.5px;
+    color: var(--text-main);
+}
+
+.text-muted {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+/* KPI Grid */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.kpi-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi-card.highlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background-color: var(--color-error);
+}
+
+.kpi-content {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.kpi-icon {
+    background-color: var(--border-brand);
+    color: var(--brand-green);
+    padding: 0.75rem;
+    border-radius: 10px;
+    margin-right: 1rem;
+    display: flex;
+}
+
+.kpi-info .kpi-title {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.kpi-info .kpi-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.kpi-trend {
+    font-size: 0.8rem;
+    font-weight: 600;
+    align-self: flex-end;
+}
+
+.kpi-trend.positive {
+    color: var(--brand-green);
+}
+
+.kpi-trend.neutral {
+    color: var(--text-muted);
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Lista de Proyectos */
+.project-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.project-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: var(--bg-card-hover);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.project-info h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.05rem;
+    color: var(--text-main);
+}
+
+.project-status {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    background-color: var(--border-color);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+}
+
+.project-meta {
+    text-align: right;
+    min-width: 120px;
+}
+
+.project-expected {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-main);
+}
+
+.progress-bar {
+    height: 6px;
+    background-color: var(--border-color);
+    border-radius: 3px;
+    margin-top: 0.5rem;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: var(--brand-green);
+    border-radius: 3px;
+}
+
+/* Gráfico de barras simple (Mock) */
+.mock-chart {
+    height: 250px;
+    display: flex;
+    align-items: flex-end;
+    padding-top: 2rem;
+}
+
+.bar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    width: 100%;
+    height: 100%;
+    gap: 10px;
+}
+
+.bar {
+    flex: 1;
+    background-color: var(--border-color);
+    border-radius: 4px 4px 0 0;
+    position: relative;
+    transition: height 0.3s ease, background-color 0.2s;
+}
+
+.bar:hover {
+    background-color: var(--bg-card-hover);
+}
+
+.highlight-bar {
+    background-color: var(--brand-green);
+}
+
+.highlight-bar:hover {
+    background-color: var(--brand-green-hover);
+}
+
+.bar span {
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}

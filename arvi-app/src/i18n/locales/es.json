@@ -1,0 +1,529 @@
+{
+    "landing": {
+        "title": "Mantenimiento Integral y Eficiencia para Comunidades y Pymes",
+        "subtitle": "Más de 20 años transformando espacios residenciales e industriales. La digitalización y transparencia que tu edificio merece.",
+        "adminAccess": "Panel de Administración",
+        "clientPortal": "Portal del Vecino",
+        "nav": {
+            "solutions": "Soluciones",
+            "faq": "FAQS",
+            "successCases": "Casos de éxito",
+            "blog": "Blog",
+            "contact": "Contacto",
+            "adminAccess": "Acceso Admin",
+            "portalVei": "Portal Vecino"
+        },
+        "hero": {
+            "discover": "Descubre nuestros servicios",
+            "requestBudget": "Solicitar presupuesto"
+        },
+        "about": {
+            "title": "Sobre Nosotros",
+            "history": "ARVI Manteniments Integrals S.L. nació hace más de 20 años en Sabadell con el objetivo de ofrecer servicios de reformas y mantenimientos integrales para hogares y empresas. Creemos que cada proyecto es único y nos dedicamos a ofrecer soluciones adaptadas a las necesidades de los clientes, garantizando calidad, rapidez y un trato personalizado.",
+            "motto": "Reparamos el pasado · Mantenemos el presente · Instalamos el futuro."
+        },
+        "stats": {
+            "communities": "Comunidades gestionadas",
+            "emergency": "Respuesta a emergencias",
+            "transparency": "Transparencia en costes"
+        },
+        "services": {
+            "title": "Nuestros Servicios",
+            "subtitle": "Haz clic en cada servicio para ver todos los detalles.",
+            "integral": "Mantenimiento Integral",
+            "integralDesc": "Climatización, fontanería, electricidad y mantenimiento preventivo programado para maquinaria (ascensores, calderas).",
+            "communities": "Gestión de Comunidades",
+            "communitiesDesc": "Mantenimiento y cuidado de los espacios comunes en perfecto estado. Servicio profesional, ágil y adaptado a cada comunidad.",
+            "reforms": "Reformas Integrales",
+            "reformsDesc": "Diseño e implementación de proyectos personalizados: cocinas, baños, suelos, ventanas y puertas. Rehabilitación de fachadas y bajantes.",
+            "customProjects": "Proyectos Personalizados",
+            "customProjectsDesc": "Especialistas en reformas integrales para franquicias de Poke, restaurantes y locales comerciales. Obras completas llave en mano con acabados premium.",
+            "viewMore": "Ver más →"
+        },
+        "successCases": {
+            "title": "Casos de éxito"
+        },
+        "blog": {
+            "title": "Blog & Novedades",
+            "subtitle": "Consejos, normativa y novedades del sector del mantenimiento.",
+            "readArticle": "Leer artículo →"
+        },
+        "back": "Volver",
+        "contact": {
+            "title": "Contacto",
+            "phone": "+34 669 47 55 83",
+            "phoneLabel": "Atención al Cliente",
+            "email": "info@arvimanteniment.com",
+            "emailLabel": "Correo Electrónico",
+            "location": "Sede Central",
+            "address": "C/ Sentmenat, 5, Sabadell 08203",
+            "tin": "B64773450",
+            "tinLabel": "Datos Fiscales",
+            "sendMessage": "Enviar Mensaje"
+        },
+        "testimonials": {
+            "title": "La opinión de nuestros clientes",
+            "t1": "«Desde que ARVI gestiona nuestra comunidad en Creu Alta, Sabadell, la respuesta a las incidencias ha mejorado drásticamente. El portal de vecinos es una maravilla.»",
+            "a1": "- Comunidad Almogàvar (Sabadell)",
+            "t2": "«Nos han hecho toda la reforma de accesibilidad del portal en Terrassa cumpliendo estrictamente el presupuesto y el tiempo.»",
+            "a2": "- Presidente C/ Cervantes (Terrassa)",
+            "t3": "«Tenemos contratado el mantenimiento preventivo de nuestro local comercial y no tenemos que preocuparnos por ninguna revisión periódica.»",
+            "a3": "- Restaurante Local (Barberà del Vallès)"
+        },
+        "footer": "ARVI Manteniments Integrals, S.L. 2026. Expertos en el Vallès Occidental.",
+        "cta": {
+            "title": "¿Preparado para digitalizar tu edificio?",
+            "subtitle": "Habla con nuestro equipo. Sin compromisos.",
+            "button": "Contactar ahora"
+        }
+    },
+    "blog": {
+        "title": "Blog & Novedades",
+        "subtitle": "Consejos preventivos, normativa y novedades del sector.",
+        "search": "Buscar artículos...",
+        "noPosts": "No se han encontrado artículos con estos criterios.",
+        "readArticle": "Leer artículo →",
+        "subscribe": {
+            "title": "¿Quieres estar al día?",
+            "subtitle": "Recibe nuestras guías y consejos directamente en tu correo.",
+            "placeholder": "Tu correo...",
+            "button": "Suscribirse"
+        },
+        "related": "Artículos relacionados",
+        "loading": "Cargando artículo..."
+    },
+    "contact": {
+        "sent": {
+            "title": "¡Solicitud enviada!",
+            "message": "Hemos recibido tu solicitud de presupuesto. Se abrirá tu gestor de correo para confirmar el envío final.",
+            "back": "Volver al inicio"
+        },
+        "form": {
+            "title": "Solicitar Presupuesto",
+            "subtitle": "Cuéntanos tu proyecto y te responderemos en menos de 24h.",
+            "labels": {
+                "name": "Nombre completo",
+                "phone": "Teléfono",
+                "email": "Correo electrónico",
+                "service": "Tipo de servicio",
+                "message": "Detalles del proyecto"
+            },
+            "placeholders": {
+                "name": "Tu nombre",
+                "phone": "600 000 000",
+                "email": "correo@ejemplo.com",
+                "message": "Cuéntanos brevemente qué necesitas..."
+            },
+            "services": {
+                "reforms": "Reforma Integral",
+                "communities": "Gestión de Comunidades",
+                "maintenance": "Mantenimiento",
+                "others": "Otros Proyectos"
+            },
+            "submit": "Enviar Solicitud",
+            "sending": "Enviando...",
+            "contactInfoTitle": "Datos de Contacto",
+            "headquarters": "Sede Central",
+            "fiscalData": "Datos Fiscales"
+        }
+    },
+    "faqs": {
+        "title": "Preguntas Frecuentes",
+        "subtitle": "Todo lo que necesitas saber antes de empezar tu proyecto.",
+        "cta": {
+            "title": "¿No encuentras tu respuesta?",
+            "subtitle": "Contacta directamente con nosotros y te responderemos en menos de 24 horas.",
+            "button": "Contactar ahora"
+        },
+        "categories": {
+            "reforms": "Reformas",
+            "interiorism": "Interiorismo y Decoración",
+            "maintenance": "Mantenimiento y Otros Trabajos",
+            "process": "Presupuesto y Proceso"
+        },
+        "data": [
+            {
+                "category": "Reformas",
+                "items": [
+                    {
+                        "q": "¿Cuánto tiempo tarda una reforma integral de piso?",
+                        "a": "El plazo varía según la superficie y el alcance de los trabajos. Una reforma integral de un piso de 80 m² suele durar entre 6 y 10 semanas. Siempre elaboramos un plan de trabajo detallado con fechas comprometidas antes de iniciar la obra."
+                    },
+                    {
+                        "q": "¿Necesito proyecto de arquitecto para reformar mi cocina o baño?",
+                        "a": "Para reformas interiores sin modificar la distribución de muros de carga, no suele requerirse proyecto de arquitecto. Sin embargo, si la reforma afecta la estructura o requiere licencia de obras mayor, gestionamos toda la documentación necesaria por ti."
+                    },
+                    {
+                        "q": "¿Hacéis reformas en áticos con terraza?",
+                        "a": "Sí, somos especialistas en áticos. Realizamos ampliaciones con estructura ligera, instalación de solarium, cerramientos acristalados y todo tipo de acabados para aprovechar al máximo el espacio exterior."
+                    },
+                    {
+                        "q": "¿Podéis gestionar la licencia de obras?",
+                        "a": "Absolutamente. Nos encargamos de toda la tramitación municipal: declaración responsable, licencias de obra menor y mayor, y coordinación con el aparejador o arquitecto cuando sea necesario."
+                    }
+                ]
+            },
+            {
+                "category": "Interiorismo y Decoración",
+                "items": [
+                    {
+                        "q": "¿Ofrecéis servicio de interiorismo junto con la reforma?",
+                        "a": "Sí. Nuestro equipo de interiorismo trabaja en paralelo con el equipo de obras. Desde el primer boceto hasta la elección de materiales, mobiliario y textiles, coordinamos todo para que el resultado sea coherente y a tu gusto."
+                    },
+                    {
+                        "q": "¿Hacéis mobiliario a medida?",
+                        "a": "Sí, fabricamos y distribuimos mobiliario a medida: armarios empotrados, cocinas, librerías, baños y cualquier elemento que requiera adaptarse a las dimensiones específicas de tu espacio."
+                    },
+                    {
+                        "q": "¿Trabajáis con algún estilo en particular?",
+                        "a": "Nos adaptamos al estilo que tú prefieras: minimalista, mediterráneo, industrial, nórdico... Nuestros diseñadores estudian tus preferencias y el espacio para crear una propuesta personalizada."
+                    }
+                ]
+            },
+            {
+                "category": "Mantenimiento y Otros Trabajos",
+                "items": [
+                    {
+                        "q": "¿Qué incluye el mantenimiento de edificios?",
+                        "a": "El mantenimiento integral de edificios cubre: revisiones periódicas de instalaciones (eléctrica, fontanería, climatización), zonas comunes, tejados e impermeabilizaciones, gestión de averías urgentes y reportes documentados de cada intervención."
+                    },
+                    {
+                        "q": "¿Qué es una remonta y cuándo es viable?",
+                        "a": "Una remonta consiste en añadir uno o más pisos sobre la cubierta de un edificio existente. Es viable cuando la estructura lo permite y el plan urbanístico lo autoriza. Realizamos el estudio previo de viabilidad técnica y legal sin compromiso."
+                    },
+                    {
+                        "q": "¿Podéis cerrar o cubrir un balcón?",
+                        "a": "Sí. Realizamos el aprovechamiento de balcones con cerramientos de aluminio, PVC o acristalamiento practicable. Tramitamos la licencia municipal cuando es preceptiva y coordinamos con la comunidad de vecinos si es necesario."
+                    },
+                    {
+                        "q": "¿Hacéis bodegas domésticas o sótanos?",
+                        "a": "Sí. Transformamos espacios infrautilizados (sótanos, bajo escalera, trasteros) en bodegas funcionales o huecos de almacenaje, con la impermeabilización, climatización y carpintería necesaria."
+                    },
+                    {
+                        "q": "¿Qué son las columnas de luz natural (patios de luz)?",
+                        "a": "Son soluciones arquitectónicas que permiten llevar luz natural a espacios interiores mediante lucernarios, tubos de luz solar o la apertura controlada de patios. Aumentan el bienestar y reducen el consumo eléctrico."
+                    }
+                ]
+            },
+            {
+                "category": "Presupuesto y Proceso",
+                "items": [
+                    {
+                        "q": "¿Cómo solicito un presupuesto?",
+                        "a": "Puedes contactarnos por teléfono, WhatsApp o email. Concertamos una visita gratuita sin compromiso, evaluamos el espacio y en 48-72 horas te enviamos un presupuesto detallado con partidas desglosadas."
+                    },
+                    {
+                        "q": "¿El presupuesto tiene sorpresas al final?",
+                        "a": "Nunca. Nuestro modelo de trabajo se basa en la transparencia total de costes. Si durante la obra aparece algún imprevisto (lo cual comunicamos de inmediato), lo presupuestamos por separado y tú decides si continuar. No añadimos costes sin tu autorización previa."
+                    },
+                    {
+                        "q": "¿Con qué antelación debo planificar una reforma?",
+                        "a": "Recomendamos contactar con al menos 4-6 semanas de antelación para obras menores, y 2-3 meses para reformas integrales. Esto permite planificar materiales, coordinar gremios y obtener las licencias necesarias."
+                    }
+                ]
+            }
+        ]
+    },
+    "services": {
+        "detail": {
+            "back": "Volver",
+            "includes": "¿Qué incluye?",
+            "requestBudget": "Solicitar presupuesto gratuito",
+            "advice": "Te resolvemos cualquier duda técnica sin compromiso.",
+            "premiumBadge": "Servicio Premium ARVI",
+            "notFound": {
+                "title": "Servicio no encontrado",
+                "desc": "Lo sentimos, este servicio no está disponible. Contacta con nosotros para más información."
+            }
+        },
+        "data": {
+            "integral": {
+                "title": "Mantenimiento Integral",
+                "badge": "Servicio Principal · ARVI",
+                "description": "La solución definitiva para la gestión de su edificio. Unificamos todos los servicios de mantenimiento técnico, preventivo y correctivo bajo un único interlocutor.",
+                "features": [
+                    "Mantenimiento preventivo programado (ascensores, calderas, PCI)",
+                    "Servicios de climatización, fontanería y electricidad",
+                    "Gestión digital de incidencias via Portal del Vecino",
+                    "Atención a averías urgentes con rapidez garantizada",
+                    "Transparencia total en costes e informes mensuales",
+                    "Optimización energética de las instalaciones comunes"
+                ]
+            },
+            "integral-reformas": {
+                "title": "Reformas Integrales",
+                "badge": "Reformas integrales",
+                "description": "Reformas llaves en mano para todo tipo de inmuebles. Nos encargamos de todo el proceso: proyecto, licencias, obra y entrega.",
+                "features": [
+                    "Proyecto completo con presupuesto detallado",
+                    "Gestión de licencias municipales",
+                    "Coordinación de todos los gremios (electricidad, fontanería, pintura…)",
+                    "Control de calidad en cada fase",
+                    "Garantía de obra por escrito",
+                    "Limpieza final incluida"
+                ]
+            },
+            "integral-pisos": {
+                "title": "Reformas Integrales de Pisos",
+                "badge": "Reformas integrales · Pisos",
+                "description": "Renovación completa de tu piso con todos los acabados incluidos: desde el derribo hasta la entrega de llaves. Transformamos espacios obsoletos en hogares modernos y eficientes.",
+                "features": [
+                    "Derribo y gestión de escombros",
+                    "Redistribución de espacios y tabiques",
+                    "Instalación eléctrica (incluido cuadro eléctrico nuevo)",
+                    "Fontanería, calefacción y climatización",
+                    "Alicatado y solado (porcelana, gres, madera, microcemento…)",
+                    "Aislamientos acústicos y térmicos",
+                    "Pintura, carpintería de madera y aluminio",
+                    "Entrega con certificado de obra finalizada"
+                ]
+            },
+            "integral-casas": {
+                "title": "Reformas Integrales de Casas",
+                "badge": "Reformas integrales · Casas",
+                "description": "Reforma integral de casas unifamiliares o adosadas. Gestionamos proyectos de cualquier envergadura, incluyendo ampliaciones y rehabilitaciones energéticas.",
+                "features": [
+                    "Ampliaciones y remontas permitidas por planeamiento",
+                    "Rehabilitación de fachadas e impermeabilización de cubierta",
+                    "Renovación de todas las instalaciones interiores",
+                    "Aislamiento SATE en fachada (ahorro energético hasta 40%)",
+                    "Sustitución de carpinterías exteriores con rotura de puente térmico",
+                    "Jardín y terraza: pavimentación e iluminación exterior",
+                    "Domótica e instalación de puntos de carga para vehículos eléctricos"
+                ]
+            },
+            "integral-aticos": {
+                "title": "Reformas Integrales de Áticos",
+                "badge": "Reformas integrales · Áticos",
+                "description": "Especializados en áticos y dúplex. Aprovechamos cada rincón de la planta y creamos terrazas espectaculares con vistas.",
+                "features": [
+                    "Estructuras ligeras para ampliación de superficie útil",
+                    "Impermeabilización y aislamiento de cubierta plana o inclinada",
+                    "Cerramientos acristalados practicables (sistema de cortina de cristal)",
+                    "Solarium y jardín de terraza",
+                    "Piscinas pequeñas o jacuzzis en terraza (estudio previo de cargas)",
+                    "Instalación de lucernarios y claraboyas",
+                    "Climatización invisible de alta eficiencia (VRV/VRF)"
+                ]
+            },
+            "cocina": {
+                "title": "Reformas de Cocina",
+                "badge": "Reformas de cocina",
+                "description": "Cocinas diseñadas a medida que combinan funcionalidad y estética. Desde la demolición hasta la instalación de electrodomésticos, lo gestionamos todo.",
+                "features": [
+                    "Diseño 3D previo con tus medidas reales",
+                    "Mobiliario de cocina a medida o de fabricante seleccionado",
+                    "Encimeras: silestone, granito, madera, acero inoxidable",
+                    "Renovación completa de fontanería y extracción",
+                    "Instalación eléctrica con circuitos independientes",
+                    "Electrodomésticos de integración: coordinamos suministro e instalación",
+                    "Alicatado y pavimento: cerámica, microcemento, vinilo"
+                ]
+            },
+            "bano": {
+                "title": "Reformas de Baño",
+                "badge": "Reformas de baño",
+                "description": "Convertimos tu baño en un espacio de bienestar. Renovación completa en 5-10 días para no interrumpir tu rutina más de lo necesario.",
+                "features": [
+                    "Sustitución de bañera por plato de ducha enrasado",
+                    "Alicatado completo: cerámica, microcemento o resina",
+                    "Renovación de fontanería y saneamiento",
+                    "Instalación de mamparas de vidrio templado a medida",
+                    "Mueble de baño suspendido y sanitarios de última generación",
+                    "Suelo radiante eléctrico bajo el pavimento",
+                    "Ventilación mecánica controlada",
+                    "Iluminación LED empotrada con control de temperatura de color"
+                ]
+            },
+            "locales": {
+                "title": "Reformas de Locales Comerciales",
+                "badge": "Reformas de locales comerciales",
+                "description": "Transformamos locales en bruto o locales en traspaso en espacios comerciales funcionales y atractivos para tu negocio, cumpliendo toda la normativa sectorial.",
+                "features": [
+                    "Adecuación a normativa de incendios, accesibilidad y sanidad",
+                    "Diseño de distribución optimizado para el flujo de clientes",
+                    "Instalaciones eléctricas trifásicas y de datos",
+                    "Climatización y ventilación adecuada al uso",
+                    "Rótulos, escaparates y fachada comercial",
+                    "Mobiliario comercial a medida",
+                    "Gestión de licencia de apertura y actividad",
+                    "Plazos de ejecución comprometidos para minimizar pérdida de negocio"
+                ]
+            },
+            "interiorismo": {
+                "title": "Interiorismo",
+                "badge": "Interiorismo",
+                "description": "Diseño de interiores personalizado que refleja tu personalidad y estilo de vida. Creamos espacios que emocionan a la vez que son completamente funcionales.",
+                "features": [
+                    "Consultoría de estilo y análisis del espacio",
+                    "Renders 3D fotorealistas antes de empezar obra",
+                    "Selección de materiales, colores y texturas",
+                    "Coordinación con arquitecto o aparejador cuando aplica",
+                    "Dirección de obra y supervisión de acabados",
+                    "Personal shopping: mobiliario, lámparas, textiles y accesorios",
+                    "Home staging para propiedades en venta o alquiler"
+                ]
+            },
+            "decoracion": {
+                "title": "Decoración",
+                "badge": "Decoración",
+                "description": "Servicio de decoración para dar vida a espacios ya reformados o que simplemente necesitan un aire nuevo sin obras. Dale un cambio radical a tu hogar.",
+                "features": [
+                    "Asesoramiento de color y pintura decorativa",
+                    "Selección y adquisición de mobiliario y complementos",
+                    "Iluminación decorativa: lámparas, tiras LED, proyectores",
+                    "Textil: cortinas, estores, alfombras, cojines",
+                    "Cuadros, espejos y elementos decorativos",
+                    "Styling final del espacio con sesión fotográfica incluida",
+                    "Servicio express: cambio de look en 48 horas"
+                ]
+            },
+            "mantenimiento-edificios": {
+                "title": "Mantenimiento de Edificios",
+                "badge": "Otros trabajos · Mantenimiento",
+                "description": "Servicio de mantenimiento preventivo y correctivo para comunidades de propietarios, edificios de oficinas y locales. Un único interlocutor para todas las incidencias.",
+                "features": [
+                    "Plan de mantenimiento preventivo personalizado",
+                    "Atención a averías urgentes 24/7",
+                    "Revisión periódica de instalaciones (eléctrica, fontanería, ascensores)",
+                    "Mantenimiento de zonas comunes: portales, garajes, piscinas",
+                    "Informe mensual digitalizado de las intervenciones realizadas",
+                    "Gestión de proveedores externos y seguros",
+                    "Acceso al portal del cliente para seguimiento de incidencias en tiempo real"
+                ]
+            },
+            "aprovechamiento-balcones": {
+                "title": "Aprovechamiento de Balcones",
+                "badge": "Otros trabajos · Balcones",
+                "description": "Convierta su balcón en un espacio habitable y confortable. Cerramientos de aluminio o acristalados que maximizan el espacio sin perder la entrada de luz.",
+                "features": [
+                    "Estudio previo de viabilidad urbanística y estructural",
+                    "Tramitación de licencia municipal cuando aplica",
+                    "Cerramiento de aluminio con lacado a color",
+                    "Cortinas de cristal practicables (sin marcos)",
+                    "Suelo de composite o gres para exterior",
+                    "Iluminación LED de acento",
+                    "Coordinación con la comunidad de propietarios"
+                ]
+            },
+            "bodegas-domesticas": {
+                "title": "Bodegas Domésticas",
+                "badge": "Otros trabajos · Bodegas",
+                "description": "Transformamos trasteros, sótanos o rincones infrautilizados en bodegas funcionales y estéticas. Almacenamiento óptimo para el vino y otros productos.",
+                "features": [
+                    "Diseño personalizado según la colección y el espacio disponible",
+                    "Climatización específica para bodega (temperatura y humedad estables)",
+                    "Botelleros a medida: madera maciza, acero, sistema modular",
+                    "Iluminación de baja emisión UV para preservar el vino",
+                    "Impermeabilización si el espacio está en sótano",
+                    "Puerta de madera maciza con cerrojo de seguridad",
+                    "Zona de cata: mesa, sillas y accesorios opcionales"
+                ]
+            },
+            "columnas-luz-natural": {
+                "title": "Columnas de Luz Natural",
+                "badge": "Otros trabajos · Luz natural",
+                "description": "Llevamos la luz del sol a cualquier rincón interior del hogar sin necesidad de abrir grandes huecos en la estructura. Soluciones de iluminación natural pasiva.",
+                "features": [
+                    "Tubos de luz solar (Solatube o similar): eficiencia del 98%",
+                    "Lucernarios fijos o practicables en cubierta plana e inclinada",
+                    "Claraboyas de doble o triple acristalamiento con control solar",
+                    "Patio de luces: recuperación o ampliación de patios interiores",
+                    "Estudio lumínico previo: cálculo de horas de sol y ahorro energético",
+                    "Sin obras estructurales en la mayoría de los casos",
+                    "Instalación en 1-2 días"
+                ]
+            },
+            "remontas": {
+                "title": "Remontas",
+                "badge": "Otros trabajos · Remontas",
+                "description": "Ampliación vertical del edificio añadiendo una o más plantas sobre la cubierta existente. Una solución para ganar superficie sin necesidad de solar adicional.",
+                "features": [
+                    "Estudio de viabilidad técnica (cálculo estructural previo)",
+                    "Consulta urbanística y tramitación de licencias",
+                    "Estructura ligera: acero galvanizado o madera laminada",
+                    "Cerramiento de alta eficiencia energética (NZEB)",
+                    "Integración arquitectónica con el edificio existente",
+                    "Instalaciones independientes (eléctrica, fontanería, telecomunicaciones)",
+                    "Opción de ascensor o escalera comunitaria de acceso"
+                ]
+            },
+            "mobiliario-medida": {
+                "title": "Mobiliario a Medida",
+                "badge": "Otros trabajos · Mobiliario",
+                "description": "Diseño y fabricación de muebles adaptados exactamente a tu espacio y estilo. Armarios, cocinas, librerías, baños y cualquier elemento singular.",
+                "features": [
+                    "Medición in situ y diseño 3D del mueble",
+                    "Amplia gama de materiales: DM lacado, madera maciza, melamina, tablero fenólico",
+                    "Acabados personalizados: RAL, madera veteada, mate o satinado",
+                    "Herrajes de calidad: Blum, Hettich, Grass",
+                    "Armarios empotrados con o sin puertas correderas",
+                    "Cocinas completas con integración de electrodomésticos",
+                    "Montaje con garantía de 2 años en mecanismos"
+                ]
+            },
+            "comunidades": {
+                "title": "Gestión de Comunidades",
+                "badge": "Comunidades",
+                "description": "Nos encargamos de las molestias del día a día en tu comunidad de propietarios para que los vecinos disfruten de tranquilidad total.",
+                "features": [
+                    "Limpieza periódica de portales, escaleras y garajes",
+                    "Atención telefónica de averías urgentes (24h)",
+                    "Mantenimiento de jardinería y piscinas",
+                    "Revisión y sustitución de luminarias",
+                    "Gestión de seguros y siniestros"
+                ]
+            },
+            "reforms": {
+                "title": "Reformas y Pequeñas Obras",
+                "badge": "Reformas",
+                "description": "Ejecutamos proyectos de reforma y adecuación de espacios con total transparencia en presupuestos y plazos.",
+                "features": [
+                    "Rehabilitación de fachadas y tejados",
+                    "Supresión de barreras arquitectónicas",
+                    "Sustitución de bajantes y pluviales",
+                    "Reformas de interiores, baños y cocinas para pymes",
+                    "Impermeabilizaciones y pintura general"
+                ]
+            }
+        }
+    },
+    "parts": {
+        "title": "Gestión de Partes y Proformas",
+        "subtitle": "Crea partes de trabajo y capturas firmas in-situ.",
+        "newDocument": "Nuevo Documento",
+        "tabWorkReports": "Partes de Trabajo",
+        "tabProformas": "Proformas",
+        "newQuickReport": "Nuevo Parte Rápido",
+        "clientProject": "Cliente / Proyecto",
+        "clientPlaceholder": "Ej: Comunidad Almogàvar",
+        "jobDescription": "Descripción del Trabajo",
+        "descriptionPlaceholder": "Detalla los trabajos realizados...",
+        "materialsUsed": "Materiales Utilizados",
+        "addLine": "Añadir línea",
+        "material": "Material",
+        "qty": "Cant.",
+        "serviceFee": "Disposición Servicio (€)",
+        "tech1Hours": "Horas Oficial 1ª",
+        "assistantHours": "Horas Ayudante",
+        "hoursPlaceholder": "Horas",
+        "workFinished": "Trabajo finalizado con éxito (OK)",
+        "legalDisclaimer": "La firma del presente parte de trabajo implica la recepción de la obra/servicio. Se advierte que la empresa no asume responsabilidad por vicios ocultos o defectos no detectables en el momento de la entrega, conforme a la normativa vigente.",
+        "customerSignature": "Firma del Cliente (Firma Digital In-Situ)",
+        "clear": "Limpiar",
+        "generatePdf": "Generar y Enviar PDF",
+        "recentReports": "Partes Recientes",
+        "activeProformas": "Proformas Activas",
+        "invoice": "Facturar",
+        "invoiced": "Facturado",
+        "convertToInvoice": "Passar a Factura",
+        "total": "Total"
+    },
+    "documents": {
+        "title": "Gestión Documental",
+        "subtitle": "Seguros, contratos y manuales de comunidades.",
+        "uploadFile": "Subir Archivo",
+        "files": "archivos",
+        "global": "Global"
+    }
+}

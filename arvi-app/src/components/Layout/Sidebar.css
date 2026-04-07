@@ -1,0 +1,107 @@
+.sidebar {
+    width: 260px;
+    background-color: var(--bg-card);
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-header {
+    padding: 2.5rem 1.5rem 2rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: center;
+}
+
+.sidebar-logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.sidebar-logo {
+    font-size: 4.5rem;
+    font-weight: 900;
+    font-family: Arial, sans-serif;
+    letter-spacing: -3px;
+    margin: 5px 0;
+    color: var(--text-main);
+    line-height: 0.8;
+}
+
+.logo-bracket-top {
+    width: 100%;
+    height: 18px;
+    border: 9px solid var(--brand-green);
+    border-bottom: none;
+    margin-bottom: 2px;
+}
+
+.logo-bracket-bottom {
+    width: 100%;
+    height: 18px;
+    border: 9px solid var(--text-main);
+    border-top: none;
+    margin-top: 5px;
+}
+
+.sidebar-subtitle {
+    font-size: 0.6rem;
+    color: var(--text-main);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 15px;
+    font-weight: 800;
+    text-align: center;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 1.5rem 1rem;
+    overflow-y: auto;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 0.85rem 1rem;
+    border-radius: 8px;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+    background-color: var(--bg-card-hover);
+    color: var(--text-main);
+}
+
+.nav-item.active {
+    background-color: rgba(140, 198, 63, 0.1);
+    color: var(--brand-green);
+    font-weight: 600;
+}
+
+.nav-icon {
+    margin-right: 1rem;
+    display: flex;
+}
+
+.sidebar-footer {
+    padding: 1.5rem 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Responsividad para móviles: Ocultamos el Sidebar */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+}

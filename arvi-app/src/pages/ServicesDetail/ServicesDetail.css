@@ -1,0 +1,45 @@
+.service-detail-page {
+    padding: 6rem 1rem;
+    min-height: 100vh;
+    background-color: var(--bg-dark);
+    display: flex;
+    justify-content: center;
+    background-image: 
+        radial-gradient(circle at 20% 20%, rgba(157, 206, 21, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(157, 206, 21, 0.05) 0%, transparent 40%);
+}
+
+.service-detail-container {
+    max-width: 900px;
+    width: 100%;
+    animation: fadeIn 0.6s ease-out;
+}
+
+.service-detail-badge {
+    background-color: rgba(157, 206, 21, 0.1);
+    color: var(--brand-green);
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(157, 206, 21, 0.2);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+    .service-detail-page {
+        padding: 4rem 1rem;
+    }
+    
+    .service-detail-container h1 {
+        font-size: 1.8rem !important;
+    }
+}

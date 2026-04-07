@@ -1,0 +1,314 @@
+/* ==========================================================================
+   PoliticaCookies.css
+   Estilos de la página de Política de Cookies
+   ========================================================================== */
+
+.politica-cookies {
+    min-height: 100vh;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    font-family: var(--font-family);
+    padding: 2rem 1rem 4rem;
+}
+
+.politica-cookies__container {
+    max-width: 860px;
+    margin: 0 auto;
+}
+
+/* ─── Hero ───────────────────────────────────────────────────────────────── */
+
+.politica-cookies__hero {
+    text-align: center;
+    padding: 3rem 0 2rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+}
+
+.politica-cookies__hero-icon {
+    font-size: 3.5rem;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.politica-cookies__title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.025em;
+}
+
+.politica-cookies__hero-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+/* ─── Panel de consentimiento actual ─────────────────────────────────────── */
+
+.politica-cookies__consent-panel {
+    background: var(--bg-card);
+    border: 1px solid rgba(157, 206, 21, 0.3);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 0 24px rgba(157, 206, 21, 0.05);
+}
+
+.politica-cookies__consent-date {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.politica-cookies__prefs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.politica-cookies__pref-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.6rem 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.politica-cookies__consent-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.politica-cookies__no-consent {
+    text-align: center;
+    padding: 0.5rem 0 0.25rem;
+}
+
+.politica-cookies__no-consent p {
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+/* ─── Botones ────────────────────────────────────────────────────────────── */
+
+.politica-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1.2rem;
+    border-radius: var(--radius-md);
+    font-family: var(--font-family);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.2s, color 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+
+.politica-btn:active {
+    transform: scale(0.97);
+}
+
+.politica-btn--primary {
+    background: var(--brand-green);
+    color: #0f172a;
+}
+
+.politica-btn--primary:hover {
+    background: var(--brand-green-hover);
+    box-shadow: 0 0 12px var(--brand-green-glow);
+}
+
+.politica-btn--outline {
+    background: transparent;
+    color: var(--brand-green);
+    border: 1.5px solid var(--brand-green);
+}
+
+.politica-btn--outline:hover {
+    background: rgba(157, 206, 21, 0.08);
+}
+
+.politica-btn--ghost {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+}
+
+.politica-btn--ghost:hover {
+    background: rgba(255, 255, 255, 0.09);
+    color: var(--color-error);
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* ─── Secciones legales ──────────────────────────────────────────────────── */
+
+.politica-cookies__legal {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.politica-cookies__section {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    transition: border-color 0.2s;
+}
+
+.politica-cookies__section:hover {
+    border-color: rgba(157, 206, 21, 0.2);
+}
+
+.politica-cookies__section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 0.85rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.politica-cookies__section p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.75;
+    margin-bottom: 0.75rem;
+}
+
+.politica-cookies__section p:last-child {
+    margin-bottom: 0;
+}
+
+.politica-cookies__list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+}
+
+.politica-cookies__list li {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    padding-left: 0.25rem;
+}
+
+.politica-cookies__ext-link {
+    color: var(--brand-green);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.2s;
+}
+
+.politica-cookies__ext-link:hover {
+    color: var(--brand-green-hover);
+}
+
+/* ─── Tabla de cookies ───────────────────────────────────────────────────── */
+
+.politica-cookies__cookie-table {
+    overflow-x: auto;
+    margin-top: 0.75rem;
+    border-radius: var(--radius-md);
+}
+
+.politica-cookies__cookie-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+
+.politica-cookies__cookie-table th {
+    background: var(--bg-dark);
+    color: var(--brand-green);
+    font-weight: 700;
+    text-align: left;
+    padding: 0.65rem 0.9rem;
+    border-bottom: 2px solid var(--border-color);
+    white-space: nowrap;
+}
+
+.politica-cookies__cookie-table td {
+    padding: 0.65rem 0.9rem;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: top;
+    line-height: 1.5;
+}
+
+.politica-cookies__cookie-table tr:last-child td {
+    border-bottom: none;
+}
+
+.politica-cookies__cookie-table tr:hover td {
+    background: rgba(157, 206, 21, 0.04);
+}
+
+/* ─── Tarjeta de contacto ────────────────────────────────────────────────── */
+
+.politica-cookies__contact-card {
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.politica-cookies__contact-card p {
+    font-size: 0.88rem;
+    margin: 0 !important;
+}
+
+/* ─── Volver ─────────────────────────────────────────────────────────────── */
+
+.politica-cookies__back {
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+    .politica-cookies__title {
+        font-size: 1.5rem;
+    }
+
+    .politica-cookies__consent-actions {
+        flex-direction: column;
+    }
+
+    .politica-cookies__consent-actions .politica-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .politica-cookies__cookie-table {
+        font-size: 0.75rem;
+    }
+}
+
+/* ─── Tema claro ─────────────────────────────────────────────────────────── */
+
+[data-theme='light'] .politica-cookies__contact-card,
+[data-theme='light'] .politica-cookies__cookie-table th {
+    background: #f1f5f9;
+}

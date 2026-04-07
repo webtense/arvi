@@ -1,0 +1,145 @@
+.client-portal {
+    background-color: #f7f9fa;
+    min-height: 100vh;
+    font-family: inherit;
+}
+
+.portal-header {
+    background-color: var(--primary-color, #2d3748);
+    color: white;
+    padding: 2rem 1.5rem;
+    text-align: center;
+}
+
+.portal-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.portal-header p {
+    margin: 5px 0 0;
+    opacity: 0.8;
+}
+
+.portal-main {
+    max-width: 600px;
+    margin: -20px auto 0;
+    padding: 0 1rem;
+    position: relative;
+    z-index: 10;
+}
+
+.report-card,
+.history-section {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+}
+
+.report-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.report-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.report-form textarea {
+    width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.photo-upload {
+    display: flex;
+    justify-content: center;
+}
+
+.photo-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    background: #edf2f7;
+    border: 2px dashed #cbd5e0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    width: 100%;
+    cursor: pointer;
+    color: #4a5568;
+    transition: all 0.2s;
+}
+
+.photo-btn:hover {
+    background: #e2e8f0;
+}
+
+.submit-btn {
+    width: 100%;
+    background-color: var(--primary-color, #2d3748);
+    color: white;
+    padding: 1rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.incidences-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.incidence-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.incidence-item:last-child {
+    border-bottom: none;
+}
+
+.inc-info h4 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.inc-date {
+    font-size: 0.85rem;
+    color: #718096;
+}
+
+.inc-status {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 999px;
+    font-weight: 500;
+}
+
+.inc-status.resolved {
+    background: #e6fffa;
+    color: #319795;
+}
+
+.inc-status.pending {
+    background: #fffaf0;
+    color: #dd6b20;
+}

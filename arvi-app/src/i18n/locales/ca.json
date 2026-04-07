@@ -1,0 +1,529 @@
+{
+    "landing": {
+        "title": "Manteniment Integral i Eficiència per a Comunitats i Pimes",
+        "subtitle": "Més de 20 anys transformant espais residencials i industrials. La digitalització i transparència que el teu edifici mereix.",
+        "adminAccess": "Panell d'Administració",
+        "clientPortal": "Portal del Veí",
+        "nav": {
+            "solutions": "Solucions",
+            "faq": "FAQS",
+            "successCases": "Casos d'èxit",
+            "blog": "Blog",
+            "contact": "Contacte",
+            "adminAccess": "Accés Admin",
+            "portalVei": "Portal Veí"
+        },
+        "hero": {
+            "discover": "Descobreix els nostres serveis",
+            "requestBudget": "Demanar pressupost"
+        },
+        "about": {
+            "title": "Sobre Nosaltres",
+            "history": "ARVI Manteniments Integrals S.L. va néixer fa més de 20 anys a Sabadell amb l’objectiu d’oferir serveis de reformes i manteniments integrals per a llars i empreses. Creiem que cada projecte és únic i ens dediquem a oferir solucions adaptades a les necessitats dels clients, garantint qualitat, rapidesa i un tracte personalitzat.",
+            "motto": "Reparem el passat · Mantenim el present · Instal·lem el futur."
+        },
+        "stats": {
+            "communities": "Comunitats gestionades",
+            "emergency": "Resposta a emergències",
+            "transparency": "Transparència en costos"
+        },
+        "services": {
+            "title": "Els nostres Serveis",
+            "subtitle": "Fes clic en cada servei per veure tots els detalls.",
+            "integral": "Manteniment Integral",
+            "integralDesc": "Climatització, lampisteria, electricitat i manteniment preventiu programat per a maquinària (ascensors, calderes).",
+            "communities": "Gestió de Comunitats",
+            "communitiesDesc": "Manteniment i cura dels espais comuns en perfecte estat. Servei professional, àgil i adaptat a cada comunitat.",
+            "reforms": "Reformes Integrals",
+            "reformsDesc": "Disseny i implementació de projectes personalitzats: cuines, banys, terres, finestres i portes. Rehabilitació de façanes i baixants.",
+            "customProjects": "Projectes Personalitzats",
+            "customProjectsDesc": "Especialistes en reformes integrals per a franquícies de Poke, restaurants i locals comercials. Obres completes claus en mà amb acabats premium.",
+            "viewMore": "Veure més →"
+        },
+        "successCases": {
+            "title": "Casos d'èxit"
+        },
+        "blog": {
+            "title": "Blog & Novetats",
+            "subtitle": "Consells, normativa i novetats del sector del manteniment.",
+            "readArticle": "Llegir article →"
+        },
+        "back": "Tornar",
+        "contact": {
+            "title": "Contacte",
+            "phone": "+34 669 47 55 83",
+            "phoneLabel": "Atenció al Client",
+            "email": "info@arvimanteniment.com",
+            "emailLabel": "Correu Electrònic",
+            "location": "Seu Central",
+            "address": "C/ Sentmenat, 5, Sabadell 08203",
+            "tin": "B64773450",
+            "tinLabel": "Dades Fiscals",
+            "sendMessage": "Enviar Missatge"
+        },
+        "testimonials": {
+            "title": "L'opinió dels nostres clients",
+            "t1": "«Des que ARVI gestiona la nostra comunitat a Creu Alta, Sabadell, la resposta a les incidències ha millorat dràsticament. El portal de veïns és una meravella.»",
+            "a1": "- Comunitat Almogàvar (Sabadell)",
+            "t2": "«Ens han fet tota la reforma d'accessibilitat del portal a Terrassa cumplint fil per randa el pressupost i el temps.»",
+            "a2": "- President C/ Cervantes (Terrassa)",
+            "t3": "«Tenim contractat el manteniment preventiu del nostre local comercial i no hem de preocupar-nos per cap revisió periòdica.»",
+            "a3": "- Restaurant Local (Barberà del Vallès)"
+        },
+        "footer": "ARVI Manteniments Integrals, S.L. 2026. Experts al Vallès Occidental.",
+        "cta": {
+            "title": "Preparat per digitalitzar el teu edifici?",
+            "subtitle": "Parla amb el nostre equip. Sense compromisos.",
+            "button": "Contactar ara"
+        }
+    },
+    "blog": {
+        "title": "Blog & Novetats",
+        "subtitle": "Consells preventius, normativa i novetats del sector.",
+        "search": "Buscar articles...",
+        "noPosts": "No s'han trobat articles amb aquests criteris.",
+        "readArticle": "Llegir article →",
+        "subscribe": {
+            "title": "Vols estar al dia?",
+            "subtitle": "Rep les nostres guies i consells directament al teu correu.",
+            "placeholder": "El teu correu...",
+            "button": "Subscriure's"
+        },
+        "related": "Articles relacionats",
+        "loading": "Carregant article..."
+    },
+    "contact": {
+        "sent": {
+            "title": "¡Sol·licitud enviada!",
+            "message": "Hem rebut la teva sol·licitud de pressupost. S'obrirà el teu gestor de correu per confirmar l'enviament final.",
+            "back": "Torna a l'inici"
+        },
+        "form": {
+            "title": "Demana Pressupost",
+            "subtitle": "Explica'ns el teu projecte i et respondrem en menys de 24h.",
+            "labels": {
+                "name": "Nom complet",
+                "phone": "Telèfon",
+                "email": "Correu electrònic",
+                "service": "Tipus de servei",
+                "message": "Detalls del projecte"
+            },
+            "placeholders": {
+                "name": "El teu nom",
+                "phone": "600 000 000",
+                "email": "correu@exemple.com",
+                "message": "Explica'ns breument què necessites..."
+            },
+            "services": {
+                "reforms": "Reforma Integral",
+                "communities": "Gestió de Comunitats",
+                "maintenance": "Manteniment",
+                "others": "Altres Projectes"
+            },
+            "submit": "Enviar Sol·licitud",
+            "sending": "Enviant...",
+            "contactInfoTitle": "Dades de Contacte",
+            "headquarters": "Seu Central",
+            "fiscalData": "Dades Fiscals"
+        }
+    },
+    "faqs": {
+        "title": "Preguntes Freqüents",
+        "subtitle": "Tot el que necessites saber abans de començar el teu projecte.",
+        "cta": {
+            "title": "No trobes la teva resposta?",
+            "subtitle": "Contacta directament amb nosaltres i et respondrem en menys de 24 hores.",
+            "button": "Contactar ara"
+        },
+        "categories": {
+            "reforms": "Reformes",
+            "interiorism": "Interiorisme i Decoració",
+            "maintenance": "Manteniment i Altres Treballs",
+            "process": "Pressupost i Procés"
+        },
+        "data": [
+            {
+                "category": "Reformes",
+                "items": [
+                    {
+                        "q": "Quant de temps triga una reforma integral de pis?",
+                        "a": "El termini varia segons la superfície i l'abast dels treballs. Una reforma integral d'un pis de 80 m² sol durar entre 6 i 10 setmanes. Sempre elaborem un pla de treball detallat amb dates compromeses abans d'iniciar l'obra."
+                    },
+                    {
+                        "q": "Necessito projecte d'arquitecte per reformar la meva cuina o bany?",
+                        "a": "Per a reformes interiors sense modificar la distribució de murs de càrrega, no se sol requerir projecte d'arquitecte. No obstant això, si la reforma afecta l'estructura o requereix llicència d'obres major, gestionem tota la documentació necessària per tu."
+                    },
+                    {
+                        "q": "Feu reformes en àtics amb terrassa?",
+                        "a": "Sí, som especialistes en àtics. Realitzem ampliacions amb estructura lleugera, instal·lació de solàrium, tancaments de vidre i tota mena d'acabats per aprofitar al màxim l'espai exterior."
+                    },
+                    {
+                        "q": "Podeu gestionar la llicència d'obres?",
+                        "a": "Absolutament. Ens encarreguem de tota la tramitació municipal: declaració responsable, llicències d'obra menor i major, i coordinació amb l'aparellador o arquitecte quan sigui necessari."
+                    }
+                ]
+            },
+            {
+                "category": "Interiorisme i Decoració",
+                "items": [
+                    {
+                        "q": "Ofereix servei d'interiorisme juntament amb la reforma?",
+                        "a": "Sí. El nostre equip d'interiorisme treballa en paral·lel amb l'equip d'obres. Des del primer esbós fins a l'elecció de materials, mobiliari i tèxtils, ho coordinem tot perquè el resultat sigui coherent i al teu gust."
+                    },
+                    {
+                        "q": "Feu mobiliari a mida?",
+                        "a": "Sí, fabriquem i distribuïm mobiliari a mida: armaris de paret, cuines, llibreries, banys i qualsevol element que requereixi adaptar-se a les dimensions específiques del teu espai."
+                    },
+                    {
+                        "q": "Treballeu amb algun estil en particular?",
+                        "a": "Ens adaptem a l'estil que tu prefereixis: minimalista, mediterrani, industrial, nòrdic... Els nostres dissenyadors estudien les teves preferències i l'espai per crear una proposta personalitzada."
+                    }
+                ]
+            },
+            {
+                "category": "Manteniment i Altres Treballs",
+                "items": [
+                    {
+                        "q": "Què inclou el manteniment d'edificis?",
+                        "a": "El manteniment integral d'edificis cobreix: revisions periòdiques d'instal·lacions (elèctrica, lampisteria, climatització), zones comunes, teulades i impermeabilitzacions, gestió d'avaries urgents i reports documentats de cada intervenció."
+                    },
+                    {
+                        "q": "Què és una remunta i quan és viable?",
+                        "a": "Una remunta consisteix a afegir un o més pisos sobre la coberta d'un edifici existent. És viable quan l'estructura ho permet i el pla urbanístic ho autoritza. Realitzem l'estudi previ de viabilitat tècnica i legal sense compromís."
+                    },
+                    {
+                        "q": "Podeu tancar o cobrir un balcó?",
+                        "a": "Sí. Realitzem l'aprofitament de balcons amb tancaments d'alumini, PVC o envidrament practicable. Tramitem la llicència municipal quan és preceptiva i coordinem amb la comunitat de veïns si cal."
+                    },
+                    {
+                        "q": "Feu cellers domèstics o soterranis?",
+                        "a": "Sí. Transformem espais infrautilitzats (soterranis, sota l'escala, trasters) en cellers funcionals o llocs d'emmagatzematge, amb la impermeabilització, climatització i fusteria necessària."
+                    },
+                    {
+                        "q": "Què són les columnes de llum natural (patios de llum)?",
+                        "a": "Són solucions arquitectòniques que permeten portar llum natural a espais interiors mitjançant lluernaris, tubs de llum solar o l'obertura controlada de patis. Augmenten el benestar i redueixen el consum elèctric."
+                    }
+                ]
+            },
+            {
+                "category": "Pressupost i Procés",
+                "items": [
+                    {
+                        "q": "Com sol·licito un pressupost?",
+                        "a": "Pots contactar-nos per telèfon, WhatsApp o correu electrònic. Concertem una visita gratuïta sense compromís, avaluem l'espai i en 48-72 hores t'enviem un pressupost detallat amb partides desglossades."
+                    },
+                    {
+                        "q": "El pressupost té sorpreses al final?",
+                        "a": "Mai. El nostre model de treball es basa en la transparència total de costos. Si durant l'obra apareix algun imprevist (el qual comuniquem d'immediat), el pressupostem per separat i tu decideixes si continuar. No afegim costos sense la teva autorització prèvia."
+                    },
+                    {
+                        "q": "Amb quina antelació he de planificar una reforma?",
+                        "a": "Recomanem contactar amb almenys 4-6 setmanes d'antelació per a obres menors, i 2-3 mesos per a reformes integrals. Això permet planificar materials, coordinar gremis i obtenir les llicències necessàries."
+                    }
+                ]
+            }
+        ]
+    },
+    "services": {
+        "detail": {
+            "back": "Tornar",
+            "includes": "Què inclou?",
+            "requestBudget": "Demanar pressupost gratuït",
+            "advice": "Et resolem qualsevol dubte tècnic sense compromís.",
+            "premiumBadge": "Servei Premium ARVI",
+            "notFound": {
+                "title": "Servei no trobat",
+                "desc": "Ho sentim, aquest servei no està disponible. Contacta amb nosaltres per a més informació."
+            }
+        },
+        "data": {
+            "integral": {
+                "title": "Manteniment Integral",
+                "badge": "Servei Principal · ARVI",
+                "description": "La solució definitiva per a la gestió del seu edifici. Unifiquem tots els serveis de manteniment tècnic, preventiu i correctiu sota un únic interlocutor.",
+                "features": [
+                    "Manteniment preventiu programat (ascensors, calderes, PCI)",
+                    "Serveis de climatització, lampisteria i electricitat",
+                    "Gestió digital d'incidències via Portal del Veí",
+                    "Atenció a avaries urgents amb rapidesa garantida",
+                    "Transparència total en costos i informes mensuals",
+                    "Optimització energètica de les instal·lacions comunes"
+                ]
+            },
+            "integral-reformas": {
+                "title": "Reformes Integrals",
+                "badge": "Reformes integrals",
+                "description": "Reformes claus en mà per a tot tipus d'immobles. Ens encarreguem de tot el procés: projecte, llicències, obra i lliurament.",
+                "features": [
+                    "Projecte complet amb pressupost detallat",
+                    "Gestió de llicències municipals",
+                    "Coordinació de tots els gremis (electricitat, lampisteria, pintura…)",
+                    "Control de qualitat en cada fase",
+                    "Garantia d'obra per escrit",
+                    "Neteja final inclosa"
+                ]
+            },
+            "integral-pisos": {
+                "title": "Reformes Integrals de Pisos",
+                "badge": "Reformes integrals · Pisos",
+                "description": "Renovació completa del teu pis amb tots els acabats inclosos: des de l'enderroc fins al lliurament de claus. Transformem espais obsolets en llars modernes i eficients.",
+                "features": [
+                    "Enderroc i gestió de runa",
+                    "Redistribució d'espais i envans",
+                    "Instal·lació elèctrica (inclòs quadre elèctric nou)",
+                    "Lampisteria, calefacció i climatització",
+                    "Enrajolat i pavimentació (porcellana, gres, fusta, microciment…)",
+                    "Aïllaments acústics i tèrmics",
+                    "Pintura, fusteria de fusta i alumini",
+                    "Lliurament amb certificat d'obra finalitzada"
+                ]
+            },
+            "integral-casas": {
+                "title": "Reformes Integrals de Cases",
+                "badge": "Reformes integrals · Cases",
+                "description": "Reforma integral de cases unifamiliars o adossades. Gestionem projectes de qualsevol envergadura, incloent ampliacions i rehabilitacions energètiques.",
+                "features": [
+                    "Ampliacions i remontes permeses per planejament",
+                    "Rehabilitació de façanes i impermeabilització de coberta",
+                    "Renovació de totes les instal·lacions interiors",
+                    "Aïllament SATE en façana (estalvi energètic fins al 40%)",
+                    "Substitució de fusteries exteriors amb trencament de pont tèrmic",
+                    "Jardí i terrassa: pavimentació i il·luminació exterior",
+                    "Domòtica i instal·lació de punts de càrrega per a vehicles elèctrics"
+                ]
+            },
+            "integral-aticos": {
+                "title": "Reformes Integrals d'Àtics",
+                "badge": "Reformes integrals · Àtics",
+                "description": "Especialitzats en àtics i dúplex. Aprofitem cada racó de la planta i creem terrasses espectaculars amb vistes.",
+                "features": [
+                    "Estructures lleugeres per a ampliació de superfície útil",
+                    "Impermeabilització i aïllament de coberta plana o inclinada",
+                    "Tancaments de vidre practicables (sistema de cortina de vidre)",
+                    "Solàrium i jardí de terrassa",
+                    "Piscines petites o jacuzzis en terrassa (estudi previ de càrregues)",
+                    "Instal·lació de lluernaris i claraboies",
+                    "Climatització invisible d'alta eficiència (VRV/VRF)"
+                ]
+            },
+            "cocina": {
+                "title": "Reformes de Cuina",
+                "badge": "Reformes de cuina",
+                "description": "Cuines dissenyades a mida que combinen funcionalitat i estètica. Des de la demolició fins a la instal·lació d'electrodomèstics, ho gestionem tot.",
+                "features": [
+                    "Disseny 3D previ amb les teves mides reals",
+                    "Mobiliari de cuina a mida o de fabricant seleccionat",
+                    "Taulells: silestone, granit, fusta, acer inoxidable",
+                    "Renovació completa de lampisteria i extracció",
+                    "Instal·lació elèctrica amb circuits independents",
+                    "Electrodomèstics d'integració: coordinem subministrament i instal·lació",
+                    "Enrajolat i paviment: ceràmica, microcemento, vinil"
+                ]
+            },
+            "bano": {
+                "title": "Reformes de Bany",
+                "badge": "Reformes de bany",
+                "description": "Convertim el teu bany en un espai de benestar. Renovació completa en 5-10 dies per no interrompre la teva rutina més del necessari.",
+                "features": [
+                    "Substitució de banyera per plat de dutxa anivellat",
+                    "Enrajolat complet: ceràmica, microcemento o resina",
+                    "Renovació de lampisteria i sanejament",
+                    "Instal·lació de mamparas de vidre trempat a mida",
+                    "Moble de bany suspès i sanitaris d'última generació",
+                    "Sòl radiant elèctric sota el paviment",
+                    "Ventilació mecànica controlada",
+                    "Il·luminació LED encastada amb control de temperatura de color"
+                ]
+            },
+            "locales": {
+                "title": "Reformes de Locals Comercials",
+                "badge": "Reformes de locals comercials",
+                "description": "Transformem locals en brut o locals en traspàs en espais comercials funcionals i atractius per al teu negoci, complint tota la normativa sectorial.",
+                "features": [
+                    "Adequació a normativa d'incendis, accessibilitat i sanitat",
+                    "Disseny de distribució optimitzat per al flux de clients",
+                    "Instal·lacions elèctriques trifàsiques i de dades",
+                    "Climatització i ventilació adequada a l'ús",
+                    "Rètols, aparadors i façana comercial",
+                    "Mobiliari comercial a mida",
+                    "Gestió de llicència d'obertura i activitat",
+                    "Terminis d'execució compromesos per minimitzar pèrdua de negoci"
+                ]
+            },
+            "interiorismo": {
+                "title": "Interiorisme",
+                "badge": "Interiorisme",
+                "description": "Disseny d'interiors personalitzat que reflecteix la teva personalitat i estil de vida. Creem espais que emocionen alhora que són completament funcionals.",
+                "features": [
+                    "Consultoria d'estil i anàlisi de l'espai",
+                    "Renders 3D fotorealistes abans de començar l'obra",
+                    "Selecció de materials, colors i textures",
+                    "Coordinació amb arquitecte o aparellador quan s'aplica",
+                    "Direcció d'obra i supervisió d'acabats",
+                    "Personal shopping: mobiliari, llums, tèxtils i accessoris",
+                    "Home staging per a propietats en venda o lloguer"
+                ]
+            },
+            "decoracion": {
+                "title": "Decoració",
+                "badge": "Decoració",
+                "description": "Servei de decoració per donar vida a espais ja reformats o que simplement necessiten un aire nou sense obres. Dona-li un canvi radical a la teva llar.",
+                "features": [
+                    "Assessorament de color i pintura decorativa",
+                    "Selecció i adquisició de mobiliari i complements",
+                    "Il·luminació decorativa: llums, tires LED, projectors",
+                    "Tèxtil: cortines, estores, catifes, coixins",
+                    "Quadres, miralls i elements decoratius",
+                    "Styling final de l'espai amb sessió fotogràfica inclosa",
+                    "Servei express: canvi de look en 48 hores"
+                ]
+            },
+            "mantenimiento-edificios": {
+                "title": "Mantenimiento de Edificis",
+                "badge": "Altres treballs · Manteniment",
+                "description": "Servei de manteniment preventiu i correctiu per a comunitats de propietaris, edificis d'oficines i locals. Un únic interlocutor per a totes les incidències.",
+                "features": [
+                    "Pla de manteniment preventiu personalitzat",
+                    "Atenció a avaries urgents 24/7",
+                    "Revisió periòdica d'instal·lacions (elèctrica, lampisteria, ascensors)",
+                    "Manteniment de zones comunes: portals, garatges, piscines",
+                    "Informe mensual digitalitzat de les intervencions realitzades",
+                    "Gestió de proveïdors externs i assegurances",
+                    "Accés al portal del client per al seguiment d'incidències en temps real"
+                ]
+            },
+            "aprovechamiento-balcones": {
+                "title": "Aprofitament de Balcons",
+                "badge": "Altres treballs · Balcons",
+                "description": "Converteixi el seu balcó en un espai habitable i confortable. Tancaments d'alumini o envidrats que maximitzen l'espai sense perdre l'entrada de llum.",
+                "features": [
+                    "Estudi previ de viabilitat urbanística i estructural",
+                    "Tramitació de llicència municipal quan s'aplica",
+                    "Tancament d'alumini amb lacat a color",
+                    "Cortines de vidre practicables (sense marcs)",
+                    "Sòl de composite o gres per a exterior",
+                    "Il·luminació LED d'accent",
+                    "Coordinació amb la comunitat de propietaris"
+                ]
+            },
+            "bodegas-domesticas": {
+                "title": "Cellers Domèstics",
+                "badge": "Altres treballs · Cellers",
+                "description": "Transformem trasters, soterranis o racons infrautilitzats en cellers funcionals i estètics. Emmagatzematge òptim per al vi i altres productes.",
+                "features": [
+                    "Disseny personalitzat segons la col·lecció i l'espai disponible",
+                    "Climatització específica per a celler (temperatura i humitat estables)",
+                    "Botellers a mida: fusta massissa, acer, sistema modular",
+                    "Il·luminació de baixa emissió UV per preservar el vi",
+                    "Impermeabilització si l'espai està en soterrani",
+                    "Porta de fusta massissa amb pany de seguretat",
+                    "Zona de tast: taula, cadires i accessoris opcionals"
+                ]
+            },
+            "columnas-luz-natural": {
+                "title": "Columnes de Llum Natural",
+                "badge": "Altres treballs · Llum natural",
+                "description": "Portem la llum del sol a qualsevol racó interior de la llar sense necessitat d'obrir grans buits en l'estructura. Solucions d'il·luminació natural passiva.",
+                "features": [
+                    "Tubs de llum solar (Solatube o similar): eficiència del 98%",
+                    "Lluernaris fixos o practicables en coberta plana i inclinada",
+                    "Claraboies de doble o triple envidrament amb control solar",
+                    "Pati de llums: recuperació o ampliació de patis interiors",
+                    "Estudi lumínic previ: càlcul d'hores de sol i estalvi energètic",
+                    "Sense obres estructurals en la majoria dels casos",
+                    "Instal·lació en 1-2 dies"
+                ]
+            },
+            "remontas": {
+                "title": "Remontes",
+                "badge": "Altres treballs · Remontes",
+                "description": "Ampliació vertical de l'edifici afegint una o més plantes sobre la coberta existent. Una solució per guanyar superfície sense necessitat de solar addicional.",
+                "features": [
+                    "Estudi de viabilitat tècnica (càlcul estructural previ)",
+                    "Consulta urbanística i tramitació de llicències",
+                    "Estructura lleugera: acer galvanitzat o fusta laminada",
+                    "Tancament d'alta eficiència energètica (NZEB)",
+                    "Integració arquitectònica amb l'edifici existent",
+                    "Instal·lacions independents (elèctrica, lampisteria, telecomunicacions)",
+                    "Opció d'ascensor o escala comunitària d'accés"
+                ]
+            },
+            "mobiliario-medida": {
+                "title": "Mobiliari a Mida",
+                "badge": "Altres treballs · Mobiliari",
+                "description": "Disseny i fabricació de mobles adaptats exactament al teu espai i estil. Armaris, cuines, llibreries, banys i qualsevol element singular.",
+                "features": [
+                    "Mesura in situ i disseny 3D del moble",
+                    "Àmplia gamma de materials: DM lacat, fusta massissa, melamina, tauler fenòlic",
+                    "Acabats personalitzats: RAL, fusta vetejada, mat o satinat",
+                    "Ferratges de qualitat: Blum, Hettich, Grass",
+                    "Armaris de paret amb o sense portes correderes",
+                    "Cuines completes amb integració d'electrodomèstics",
+                    "Muntatge amb garantia de 2 anys en mecanismes"
+                ]
+            },
+            "comunidades": {
+                "title": "Gestió de Comunitats",
+                "badge": "Comunitats",
+                "description": "Ens encarreguem de les molèsties del dia a dia en la teva comunitat de propietaris perquè els veïns gaudeixin de tranquil·litat total.",
+                "features": [
+                    "Neteja periòdica de portals, escales i garatges",
+                    "Atenció telefònica d'avaries urgents (24h)",
+                    "Manteniment de jardineria i piscines",
+                    "Revisió i substitució de lluminàries",
+                    "Gestió d'assegurances i sinistres"
+                ]
+            },
+            "reformas": {
+                "title": "Reformes i Petites Obres",
+                "badge": "Reformes",
+                "description": "Executem projectes de reforma i adequació d'espais amb total transparència en pressupostos i terminis.",
+                "features": [
+                    "Rehabilitació de façanes i teulades",
+                    "Supressió de barreres arquitectòniques",
+                    "Substitució de baixants i pluvials",
+                    "Reformes d'interiors, banys i cuines per a pimes",
+                    "Impermeabilitzacions i pintura general"
+                ]
+            }
+        }
+    },
+    "parts": {
+        "title": "Gestió de Parts i Proformes",
+        "subtitle": "Crea parts de treball i captures signatures in-situ.",
+        "newDocument": "Nou Document",
+        "tabWorkReports": "Parts de Treball",
+        "tabProformas": "Proformes",
+        "newQuickReport": "Nou Part Ràpid",
+        "clientProject": "Client / Projecte",
+        "clientPlaceholder": "Ex: Comunitat Almogàvar",
+        "jobDescription": "Descripció del Treball",
+        "descriptionPlaceholder": "Detalla els treballs realitzats...",
+        "materialsUsed": "Materials Utilitzats",
+        "addLine": "Afegir línia",
+        "material": "Material",
+        "qty": "Cant.",
+        "serviceFee": "Disposició Servei (€)",
+        "tech1Hours": "Hores Oficial 1ª",
+        "assistantHours": "Hores Ajudant",
+        "hoursPlaceholder": "Hores",
+        "workFinished": "Treball finalitzat amb èxit (OK)",
+        "legalDisclaimer": "La signatura del present part de treball implica la recepció de l'obra/servei. S'adverteix que l'empresa no assumeix responsabilitat per vicis ocults o defectes no detectables en el moment del lliurament, conforme a la normativa vigent.",
+        "customerSignature": "Signatura del Client (Signatura Digital In-Situ)",
+        "clear": "Netejar",
+        "generatePdf": "Generar i Enviar PDF",
+        "recentReports": "Parts Recents",
+        "activeProformas": "Proformes Actives",
+        "invoice": "Facturar",
+        "invoiced": "Facturat",
+        "convertToInvoice": "Passar a Factura",
+        "total": "Total"
+    },
+    "documents": {
+        "title": "Gestió Documental",
+        "subtitle": "Assegurances, contractes i manuals de comunitats.",
+        "uploadFile": "Pujar Arxiu",
+        "files": "arxius",
+        "global": "Global"
+    }
+}
