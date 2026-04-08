@@ -1,69 +1,107 @@
 const { Router } = require('express');
-const { PrismaClient } = require('@prisma/client');
+const { prisma } = require('../lib/prisma');
 const authMiddleware = require('../middleware/auth');
+const messages = require('../lib/errors');
 
 const router = Router();
-const prisma = new PrismaClient();
 const authorizeRoles = authMiddleware.authorizeRoles;
 
 router.use(authMiddleware, authorizeRoles('admin'));
 
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   try {
-    const { status, type, client, startDate, endDate, projectId } = req.query;
+    const { 
+      status, 
+      type, 
+      clientName, 
+      startDate, 
+      endDate, 
+      projectId,
+      page = '1',
+      limit = '50'
+    } = req.query;
+
+    const pageNum = parseInt(page) || 1;
+    const limitNum = Math.min(parseInt(limit) || 50, 100);
+    const skip = (pageNum - 1) * limitNum;
+
     const where = {};
     if (status) where.status = status;
     if (type) where.type = type;
-    if (client) where.client = { contains: client, mode: 'insensitive' };
+    if (clientName) where.clientName = { contains: clientName, mode: 'insensitive' };
     if (projectId) where.projectId = parseInt(projectId);
     if (startDate && endDate) {
       where.date = { gte: new Date(startDate), lte: new Date(endDate) };
     }
 
-    const invoices = await prisma.invoice.findMany({
-      where,
-      include: { items: true, project: true },
-      orderBy: { date: 'desc' }
+    const [invoices, total] = await Promise.all([
+      prisma.invoice.findMany({
+        where,
+        include: { items: true, project: true },
+        orderBy: { date: 'desc' },
+        skip,
+        take: limitNum
+      }),
+      prisma.invoice.count({ where })
+    ]);
+
+    res.json({
+      data: invoices,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum)
+      }
     });
-    res.json(invoices);
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener facturas' });
+    next(error);
   }
 });
 
-router.get('/stats', async (req, res) => {
+router.get('/stats', async (req, res, next) => {
   try {
     const { year } = req.query;
-    const startDate = new Date(`${year || new Date().getFullYear()}-01-01`);
-    const endDate = new Date(`${year || new Date().getFullYear()}-12-31`);
+    const currentYear = parseInt(year) || new Date().getFullYear();
+    const startDate = new Date(`${currentYear}-01-01`);
+    const endDate = new Date(`${currentYear}-12-31`);
     
-    const invoices = await prisma.invoice.findMany({
-      where: {
-        date: { gte: startDate, lte: endDate },
-        status: { in: ['finalized'] }
-      },
-      select: { total: true, date: true }
-    });
+    const [finalizedInvoices, pendingInvoices, draftCount] = await Promise.all([
+      prisma.invoice.findMany({
+        where: {
+          date: { gte: startDate, lte: endDate },
+          status: 'finalized'
+        },
+        select: { total: true, date: true }
+      }),
+      prisma.invoice.aggregate({
+        _sum: { total: true },
+        where: { paymentStatus: 'pending', status: 'finalized' }
+      }),
+      prisma.invoice.count({ where: { status: 'draft' } })
+    ]);
 
     const monthly = Array.from({ length: 12 }, (_, i) => ({
       month: i + 1,
       amount: 0
     }));
 
-    invoices.forEach(inv => {
+    finalizedInvoices.forEach(inv => {
       const month = new Date(inv.date).getMonth();
-      monthly[month].amount += inv.total;
+      monthly[month].amount += Number(inv.total);
     });
 
-    const total = invoices.reduce((sum, inv) => sum + inv.total, 0);
-    const pending = await prisma.invoice.aggregate({
-      _sum: { total: true },
-      where: { paymentStatus: 'pending' }
-    });
+    const total = finalizedInvoices.reduce((sum, inv) => sum + Number(inv.total), 0);
 
-    res.json({ total, monthly, pendingAmount: pending._sum.total || 0, count: invoices.length });
+    res.json({ 
+      total, 
+      monthly, 
+      pendingAmount: Number(pendingInvoices._sum.total) || 0, 
+      count: finalizedInvoices.length,
+      draftCount
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener estadísticas' });
+    next(error);
   }
 });
 

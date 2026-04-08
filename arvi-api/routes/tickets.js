@@ -1,12 +1,10 @@
 const { Router } = require('express');
-const { PrismaClient } = require('@prisma/client');
+const { prisma } = require('../lib/prisma');
 const authMiddleware = require('../middleware/auth');
 const fs = require('fs');
 const path = require('path');
-const { execFile } = require('child_process');
 
 const router = Router();
-const prisma = new PrismaClient();
 const authorizeRoles = authMiddleware.authorizeRoles;
 const storageDir = path.join(__dirname, '..', 'storage');
 const ticketDir = path.join(storageDir, 'tickets');
@@ -37,26 +35,39 @@ const saveImageFromDataUrl = (dataUrl, filenamePrefix) => {
   return `/api/tickets/download/${fileName}`;
 };
 
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   try {
-    const { projectId, category, status } = req.query;
+    const { category, status, projectId, page = '1', limit = '50' } = req.query;
+    const pageNum = parseInt(page) || 1;
+    const limitNum = Math.min(parseInt(limit) || 50, 100);
+    const skip = (pageNum - 1) * limitNum;
+
     const where = {};
-    if (projectId) where.projectId = parseInt(projectId);
     if (category) where.category = category;
     if (status) where.status = status;
+    if (projectId) where.projectId = parseInt(projectId);
 
-    const tickets = await prisma.ticket.findMany({
-      where,
-      include: { project: true },
-      orderBy: { createdAt: 'desc' }
+    const [tickets, total] = await Promise.all([
+      prisma.ticket.findMany({
+        where,
+        include: { project: true },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limitNum
+      }),
+      prisma.ticket.count({ where })
+    ]);
+
+    res.json({
+      data: tickets,
+      pagination: { page: pageNum, limit: limitNum, total, totalPages: Math.ceil(total / limitNum) }
     });
-    res.json(tickets);
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener tickets' });
+    next(error);
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', async (req, res, next) => {
   try {
     const payload = { ...req.body };
     const scanText = payload.description || '';

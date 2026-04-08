@@ -1,26 +1,41 @@
 const { Router } = require('express');
-const { PrismaClient } = require('@prisma/client');
+const { prisma } = require('../lib/prisma');
 const authMiddleware = require('../middleware/auth');
 
 const router = Router();
-const prisma = new PrismaClient();
 const authorizeRoles = authMiddleware.authorizeRoles;
 
 router.use(authMiddleware, authorizeRoles('admin'));
 
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   try {
-    const projects = await prisma.project.findMany({
-      include: {
-        _count: {
-          select: { tickets: true, budgets: true, parts: true }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
+    const { status, page = '1', limit = '50' } = req.query;
+    const pageNum = parseInt(page) || 1;
+    const limitNum = Math.min(parseInt(limit) || 50, 100);
+    const skip = (pageNum - 1) * limitNum;
+
+    const where = {};
+    if (status) where.status = status;
+
+    const [projects, total] = await Promise.all([
+      prisma.project.findMany({
+        where,
+        include: {
+          _count: { select: { tickets: true, budgets: true, parts: true } }
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limitNum
+      }),
+      prisma.project.count({ where })
+    ]);
+
+    res.json({
+      data: projects,
+      pagination: { page: pageNum, limit: limitNum, total, totalPages: Math.ceil(total / limitNum) }
     });
-    res.json(projects);
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener proyectos' });
+    next(error);
   }
 });
 

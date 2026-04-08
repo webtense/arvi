@@ -1,29 +1,42 @@
 const { Router } = require('express');
-const { PrismaClient } = require('@prisma/client');
+const { prisma } = require('../lib/prisma');
 const authMiddleware = require('../middleware/auth');
+const messages = require('../lib/errors');
 
 const router = Router();
-const prisma = new PrismaClient();
 const authorizeRoles = authMiddleware.authorizeRoles;
 
 router.use(authMiddleware, authorizeRoles('admin'));
 
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   try {
-    const { status, client, projectId } = req.query;
+    const { status, clientName, projectId, page = '1', limit = '50' } = req.query;
+    const pageNum = parseInt(page) || 1;
+    const limitNum = Math.min(parseInt(limit) || 50, 100);
+    const skip = (pageNum - 1) * limitNum;
+
     const where = {};
     if (status) where.status = status;
-    if (client) where.client = { contains: client, mode: 'insensitive' };
+    if (clientName) where.client = { contains: clientName, mode: 'insensitive' };
     if (projectId) where.projectId = parseInt(projectId);
 
-    const budgets = await prisma.budget.findMany({
-      where,
-      include: { items: true, project: true },
-      orderBy: { createdAt: 'desc' }
+    const [budgets, total] = await Promise.all([
+      prisma.budget.findMany({
+        where,
+        include: { items: true, project: true },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limitNum
+      }),
+      prisma.budget.count({ where })
+    ]);
+
+    res.json({
+      data: budgets,
+      pagination: { page: pageNum, limit: limitNum, total, totalPages: Math.ceil(total / limitNum) }
     });
-    res.json(budgets);
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener presupuestos' });
+    next(error);
   }
 });
 

@@ -1,13 +1,20 @@
 const { Router } = require('express');
-const { PrismaClient } = require('@prisma/client');
+const { prisma } = require('../lib/prisma');
+const authMiddleware = require('../middleware/auth');
+const messages = require('../lib/errors');
 
 const router = Router();
-const prisma = new PrismaClient();
 
-// GET /api/clients - List all clients (with optional search)
-router.get('/', async (req, res) => {
+router.use(authMiddleware);
+
+// GET /api/clients - List all clients (with optional search and pagination)
+router.get('/', async (req, res, next) => {
   try {
-    const { search } = req.query;
+    const { search, page = '1', limit = '50' } = req.query;
+    const pageNum = parseInt(page) || 1;
+    const limitNum = Math.min(parseInt(limit) || 50, 100);
+    const skip = (pageNum - 1) * limitNum;
+
     const where = search 
       ? {
           OR: [
@@ -17,19 +24,33 @@ router.get('/', async (req, res) => {
           ]
         }
       : {};
-    
-    const clients = await prisma.client.findMany({
-      where,
-      orderBy: { name: 'asc' }
+
+    const [clients, total] = await Promise.all([
+      prisma.client.findMany({
+        where,
+        orderBy: { name: 'asc' },
+        skip,
+        take: limitNum
+      }),
+      prisma.client.count({ where })
+    ]);
+
+    res.json({
+      data: clients,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum)
+      }
     });
-    res.json(clients);
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener clientes' });
+    next(error);
   }
 });
 
 // GET /api/clients/:id - Get single client with invoices
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
     const client = await prisma.client.findUnique({
@@ -43,31 +64,30 @@ router.get('/:id', async (req, res) => {
     });
     
     if (!client) {
-      return res.status(404).json({ error: 'Cliente no encontrado' });
+      return res.status(404).json({ error: messages.CLIENT_NOT_FOUND });
     }
     
     res.json(client);
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener cliente' });
+    next(error);
   }
 });
 
 // POST /api/clients - Create new client
-router.post('/', async (req, res) => {
+router.post('/', async (req, res, next) => {
   try {
     const { name, cif, email, phone, address, iban, contactPerson, notes } = req.body;
     
     if (!name) {
-      return res.status(400).json({ error: 'El nombre es obligatorio' });
+      return res.status(400).json({ error: messages.CLIENT_NAME_REQUIRED });
     }
     
-    // Check if CIF already exists
     if (cif) {
       const existing = await prisma.client.findUnique({
         where: { cif }
       });
       if (existing) {
-        return res.status(400).json({ error: 'Ya existe un cliente con este CIF' });
+        return res.status(400).json({ error: messages.CLIENT_CIF_EXISTS });
       }
     }
     
@@ -86,12 +106,12 @@ router.post('/', async (req, res) => {
     
     res.status(201).json(client);
   } catch (error) {
-    res.status(500).json({ error: 'Error al crear cliente' });
+    next(error);
   }
 });
 
 // PUT /api/clients/:id - Update client
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name, cif, email, phone, address, iban, contactPerson, notes } = req.body;
@@ -112,33 +132,31 @@ router.put('/:id', async (req, res) => {
     
     res.json(client);
   } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar cliente' });
+    next(error);
   }
 });
 
 // DELETE /api/clients/:id - Delete client
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
+    const parsedId = parseInt(id);
     
-    // Check if client has invoices
     const invoiceCount = await prisma.invoice.count({
-      where: { client: { id: parseInt(id) } }
+      where: { clientId: parsedId }
     });
     
     if (invoiceCount > 0) {
-      return res.status(400).json({ 
-        error: 'No se puede eliminar el cliente porque tiene facturas asociadas' 
-      });
+      return res.status(400).json({ error: messages.CLIENT_HAS_INVOICES });
     }
     
     await prisma.client.delete({
-      where: { id: parseInt(id) }
+      where: { id: parsedId }
     });
     
     res.json({ message: 'Cliente eliminado' });
   } catch (error) {
-    res.status(500).json({ error: 'Error al eliminar cliente' });
+    next(error);
   }
 });
 

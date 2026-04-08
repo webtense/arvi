@@ -1,22 +1,42 @@
 const { Router } = require('express');
-const { PrismaClient } = require('@prisma/client');
+const { prisma } = require('../lib/prisma');
 const authMiddleware = require('../middleware/auth');
+const messages = require('../lib/errors');
 
 const router = Router();
-const prisma = new PrismaClient();
 const authorizeRoles = authMiddleware.authorizeRoles;
 
 router.use(authMiddleware, authorizeRoles('admin'));
 
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   try {
-    const parts = await prisma.part.findMany({
-      include: { items: true, project: true },
-      orderBy: { createdAt: 'desc' }
+    const { status, clientName, projectId, page = '1', limit = '50' } = req.query;
+    const pageNum = parseInt(page) || 1;
+    const limitNum = Math.min(parseInt(limit) || 50, 100);
+    const skip = (pageNum - 1) * limitNum;
+
+    const where = {};
+    if (status) where.status = status;
+    if (clientName) where.client = { contains: clientName, mode: 'insensitive' };
+    if (projectId) where.projectId = parseInt(projectId);
+
+    const [parts, total] = await Promise.all([
+      prisma.part.findMany({
+        where,
+        include: { items: true, project: true },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limitNum
+      }),
+      prisma.part.count({ where })
+    ]);
+
+    res.json({
+      data: parts,
+      pagination: { page: pageNum, limit: limitNum, total, totalPages: Math.ceil(total / limitNum) }
     });
-    res.json(parts);
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener partes' });
+    next(error);
   }
 });
 

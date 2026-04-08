@@ -1,34 +1,37 @@
 const { Router } = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { PrismaClient } = require('@prisma/client');
+const { prisma } = require('../lib/prisma');
+const authMiddleware = require('../middleware/auth');
+const messages = require('../lib/errors');
 
 const router = Router();
-const prisma = new PrismaClient();
 
-const authMiddleware = require('../middleware/auth');
-
-router.post('/login', async (req, res) => {
+router.post('/login', async (req, res, next) => {
   try {
     const { username, password } = req.body;
+    
+    if (!username || !password) {
+      return res.status(400).json({ error: messages.FIELD_REQUIRED('username y password') });
+    }
     
     const user = await prisma.user.findUnique({
       where: { username }
     });
 
     if (!user) {
-      return res.status(401).json({ error: 'Credenciales incorrectas' });
+      return res.status(401).json({ error: messages.AUTH_INVALID_CREDENTIALS });
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(401).json({ error: 'Credenciales incorrectas' });
+      return res.status(401).json({ error: messages.AUTH_INVALID_CREDENTIALS });
     }
 
     const token = jwt.sign(
       { id: user.id, username: user.username, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
     );
 
     res.json({
@@ -41,23 +44,31 @@ router.post('/login', async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ error: 'Error en el servidor' });
+    next(error);
   }
 });
 
-router.post('/register', async (req, res) => {
+router.post('/register', async (req, res, next) => {
   try {
     const { username, password, email } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ error: messages.FIELD_REQUIRED('username y password') });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({ error: messages.AUTH_WEAK_PASSWORD });
+    }
 
     const existingUser = await prisma.user.findUnique({
       where: { username }
     });
 
     if (existingUser) {
-      return res.status(400).json({ error: 'El usuario ya existe' });
+      return res.status(400).json({ error: messages.AUTH_USER_ALREADY_EXISTS });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     const user = await prisma.user.create({
       data: {
@@ -68,13 +79,13 @@ router.post('/register', async (req, res) => {
       }
     });
 
-    res.status(201).json({ message: 'Usuario creado correctamente' });
+    res.status(201).json({ message: 'Usuario creado correctamente', userId: user.id });
   } catch (error) {
-    res.status(500).json({ error: 'Error en el servidor' });
+    next(error);
   }
 });
 
-router.get('/me', authMiddleware, async (req, res) => {
+router.get('/me', authMiddleware, async (req, res, next) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
@@ -87,12 +98,12 @@ router.get('/me', authMiddleware, async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ error: 'Usuario no encontrado' });
+      return res.status(404).json({ error: messages.AUTH_USER_NOT_FOUND });
     }
 
     res.json({ user });
   } catch (error) {
-    res.status(500).json({ error: 'Error en el servidor' });
+    next(error);
   }
 });
 
