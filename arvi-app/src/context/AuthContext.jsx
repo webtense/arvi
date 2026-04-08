@@ -1,4 +1,5 @@
-import React, { createContext, useState, useContext } from 'react';
+/* eslint-disable react/prop-types */
+import { createContext, useState, useContext, useEffect } from 'react';
 import api from '../services/api';
 
 const AuthContext = createContext(null);
@@ -8,6 +9,46 @@ export const AuthProvider = ({ children }) => {
         const savedUser = localStorage.getItem('arviUser');
         return savedUser ? JSON.parse(savedUser) : null;
     });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const syncSession = async () => {
+            const token = localStorage.getItem('arvi_token');
+
+            if (!token) {
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const data = await api.getCurrentUser();
+                if (data?.user) {
+                    setUser(data.user);
+                    localStorage.setItem('arviUser', JSON.stringify(data.user));
+                } else {
+                    throw new Error('Sesion invalida');
+                }
+            } catch (error) {
+                api.logout();
+                setUser(null);
+                localStorage.removeItem('arviUser');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        syncSession();
+    }, []);
+
+    useEffect(() => {
+        const handleAuthExpired = () => {
+            setUser(null);
+            setLoading(false);
+        };
+
+        window.addEventListener('arvi:auth-expired', handleAuthExpired);
+        return () => window.removeEventListener('arvi:auth-expired', handleAuthExpired);
+    }, []);
 
     const login = async (username, password) => {
         try {
@@ -25,18 +66,6 @@ export const AuthProvider = ({ children }) => {
             }
             return { success: false, error: 'Respuesta inválida del servidor' };
         } catch (error) {
-            if (username === 'admin' && password === 'P1pigr@n!') {
-                const adminUser = { username: 'admin', role: 'admin' };
-                setUser(adminUser);
-                localStorage.setItem('arviUser', JSON.stringify(adminUser));
-                return { success: true, role: 'admin' };
-            }
-            if (username === 'vecino' && password === '1234') {
-                const clientUser = { username: 'vecino', role: 'client' };
-                setUser(clientUser);
-                localStorage.setItem('arviUser', JSON.stringify(clientUser));
-                return { success: true, role: 'client' };
-            }
             return { success: false, error: error.message || 'Credenciales incorrectas' };
         }
     };
@@ -49,7 +78,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

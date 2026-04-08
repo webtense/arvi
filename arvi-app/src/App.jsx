@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppLayout } from './components/Layout/AppLayout';
 import { Landing } from './pages/Landing/Landing';
@@ -41,6 +40,7 @@ import { WhatsAppButton } from './components/FloatingWidgets/WhatsAppButton';
 import { BlogList } from './pages/PublicBlog/BlogList';
 import { BlogPost } from './pages/PublicBlog/BlogPost';
 import { PublicLayout } from './components/Layout/PublicLayout';
+import { GlobalToast } from './components/Feedback/GlobalToast';
 
 function AppContent() {
   useAutoTheme();
@@ -68,7 +68,15 @@ function AppContent() {
         {/* Aplicación de Administración Protegida */}
         <Route path="/app" element={
           <ProtectedRoute allowedRoles={['admin']}>
-            <AppLayout />
+            <AssetsProvider>
+              <TicketsProvider>
+                <BudgetsProvider>
+                  <AccountingProvider>
+                    <AppLayout />
+                  </AccountingProvider>
+                </BudgetsProvider>
+              </TicketsProvider>
+            </AssetsProvider>
           </ProtectedRoute>
         }>
           <Route index element={<Navigate to="dashboard" replace />} />
@@ -93,6 +101,7 @@ function AppContent() {
       <CookieConsentManager />
       <WhatsAppButton />
       <FloatingContact />
+      <GlobalToast />
     </>
   );
 }
@@ -101,19 +110,11 @@ function App() {
   return (
     <SettingsProvider>
       <AuthProvider>
-        <AssetsProvider>
-          <TicketsProvider>
-            <BudgetsProvider>
-              <AccountingProvider>
-                <BlogProvider>
-                  <BrowserRouter>
-                    <AppContent />
-                  </BrowserRouter>
-                </BlogProvider>
-              </AccountingProvider>
-            </BudgetsProvider>
-          </TicketsProvider>
-        </AssetsProvider>
+        <BlogProvider>
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
+        </BlogProvider>
       </AuthProvider>
     </SettingsProvider>
   );

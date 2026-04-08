@@ -1,10 +1,14 @@
-import React from 'react';
+/* eslint-disable react/prop-types */
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 export const ProtectedRoute = ({ children, allowedRoles }) => {
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
     const location = useLocation();
+
+    if (loading) {
+        return null;
+    }
 
     if (!user) {
         // Redirect them to the /login page, but save the current location they were trying to go to

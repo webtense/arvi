@@ -1,4 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL || '/api';
+import { emitToast } from '../utils/toast';
 
 class ApiService {
   constructor() {
@@ -20,6 +21,7 @@ class ApiService {
   async request(endpoint, options = {}) {
     const url = `${this.baseUrl}${endpoint}`;
     const token = this.getToken();
+    const isPublicAuthEndpoint = endpoint === '/auth/login' || endpoint === '/auth/register';
 
     const headers = {
       'Content-Type': 'application/json',
@@ -34,6 +36,20 @@ class ApiService {
       });
 
       if (!response.ok) {
+        if ((response.status === 401 || response.status === 403) && token && !isPublicAuthEndpoint) {
+          this.removeToken();
+          localStorage.removeItem('arviUser');
+          if (typeof window !== 'undefined') {
+            emitToast({
+              type: 'error',
+              message: 'Tu sesion ha expirado. Inicia sesion de nuevo.'
+            });
+            window.dispatchEvent(new CustomEvent('arvi:auth-expired', {
+              detail: { status: response.status }
+            }));
+          }
+        }
+
         const error = await response.json().catch(() => ({ error: 'Error de servidor' }));
         throw new Error(error.error || 'Error en la solicitud');
       }
@@ -59,6 +75,10 @@ class ApiService {
 
   async logout() {
     this.removeToken();
+  }
+
+  async getCurrentUser() {
+    return this.request('/auth/me');
   }
 
   // Invoices
