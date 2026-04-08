@@ -41,6 +41,16 @@
     border-color: var(--brand-green);
 }
 
+/* Mobile filter buttons */
+@media (max-width: 480px) {
+    .filter-btn {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+        flex: 1;
+        text-align: center;
+    }
+}
+
 .invoice-container {
     color: #000 !important;
 }
