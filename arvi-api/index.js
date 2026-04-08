@@ -43,6 +43,7 @@ const ticketsRoutes = require('./routes/tickets');
 const projectsRoutes = require('./routes/projects');
 const subcontractorsRoutes = require('./routes/subcontractors');
 const clientsRoutes = require('./routes/clients');
+const contactRoutes = require('./routes/contact');
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -63,6 +64,7 @@ app.use('/api/tickets', ticketsRoutes);
 app.use('/api/projects', projectsRoutes);
 app.use('/api/subcontractors', subcontractorsRoutes);
 app.use('/api/clients', clientsRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Static files (uploads)
 app.use('/api/storage', express.static(path.join(__dirname, 'storage')));

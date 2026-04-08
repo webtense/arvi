@@ -328,6 +328,14 @@ class ApiService {
       method: 'DELETE',
     });
   }
+
+  // Contact
+  async sendContact(data) {
+    return this.request('/contact', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
 }
 
 export const api = new ApiService();
