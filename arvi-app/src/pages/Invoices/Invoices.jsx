@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Card } from '../../components/Card/Card';
 import { Button } from '../../components/Button/Button';
 import { FileText, Printer, ChevronLeft, CheckCircle, AlertTriangle, Download, Upload, Plus } from 'lucide-react';
 import { useAccounting } from '../../context/AccountingContext';
 import { QRCodeSVG } from 'qrcode.react';
+import { emitToast } from '../../utils/toast';
 import './Invoices.css';
 
 export const Invoices = () => {
@@ -27,16 +28,12 @@ export const Invoices = () => {
     const handleFinalize = () => {
         finalizeInvoice(selectedInvoice.id);
         setShowConfirmModal(false);
-        // Despues de finalizar, actualizamos el invoice seleccionado para ver los cambios
-        const updated = invoices.find(inv => inv.id === selectedInvoice.id);
-        // Note: state update in context might not be immediate for this local variable, 
-        // but the useEffect in context will trigger a re-render.
         setViewMode('list');
     };
 
     const handleCreateInvoice = () => {
         if (!newInvClient || !newInvAmount) {
-            alert('Por favor, indica el cliente y el importe.');
+            emitToast({ type: 'error', message: 'Por favor, indica el cliente y el importe.' });
             return;
         }
 

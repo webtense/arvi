@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Card } from '../../components/Card/Card';
 import { Button } from '../../components/Button/Button';
 import { HardHat, Pencil, Trash2, PlusCircle } from 'lucide-react';
 import api from '../../services/api';
+import { emitToast } from '../../utils/toast';
 
 const emptyForm = {
     name: '',
@@ -30,7 +31,12 @@ export const Subcontractors = () => {
             setItems(data || []);
         } catch (error) {
             const local = localStorage.getItem('arvi_subcontractors');
-            if (local) setItems(JSON.parse(local));
+            if (local) {
+                setItems(JSON.parse(local));
+                emitToast({ type: 'info', message: 'Subcontratas cargadas en local. Pendiente de sincronizar.' });
+            } else {
+                emitToast({ type: 'error', message: 'No se pudieron cargar las subcontratas.' });
+            }
         } finally {
             setLoading(false);
         }
@@ -60,15 +66,20 @@ export const Subcontractors = () => {
 
     const onSubmit = async (e) => {
         e.preventDefault();
-        if (!form.name || !form.cif) return;
+        if (!form.name || !form.cif) {
+            emitToast({ type: 'error', message: 'Nombre y CIF son obligatorios.' });
+            return;
+        }
 
         try {
             if (editingId) {
                 const updated = await api.updateSubcontractor(editingId, form);
                 setItems((prev) => prev.map((s) => (s.id === editingId ? updated : s)));
+                emitToast({ type: 'success', message: 'Subcontrata actualizada.' });
             } else {
                 const created = await api.createSubcontractor(form);
                 setItems((prev) => [created, ...prev]);
+                emitToast({ type: 'success', message: 'Subcontrata creada correctamente.' });
             }
         } catch (error) {
             if (editingId) {
@@ -76,6 +87,7 @@ export const Subcontractors = () => {
             } else {
                 setItems((prev) => [{ id: Date.now(), ...form }, ...prev]);
             }
+            emitToast({ type: 'info', message: 'Cambios guardados en local. Pendiente de sincronizar.' });
         }
 
         setForm(emptyForm);
@@ -100,8 +112,9 @@ export const Subcontractors = () => {
     const remove = async (id) => {
         try {
             await api.deleteSubcontractor(id);
+            emitToast({ type: 'success', message: 'Subcontrata eliminada.' });
         } catch (error) {
-            // fallback local only
+            emitToast({ type: 'info', message: 'Subcontrata eliminada en local. Pendiente de sincronizar.' });
         }
         setItems((prev) => prev.filter((s) => s.id !== id));
     };

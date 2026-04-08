@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+/* eslint-disable react/prop-types */
+import { createContext, useContext, useState, useEffect } from 'react';
 import api from '../services/api';
+import { emitToast } from '../utils/toast';
 
 export const AssetsContext = createContext();
 
@@ -29,7 +31,12 @@ export const AssetsProvider = ({ children }) => {
         } catch (error) {
             console.error('Error fetching assets:', error);
             const saved = localStorage.getItem('arvi_assets');
-            if (saved) setAssets(JSON.parse(saved));
+            if (saved) {
+                setAssets(JSON.parse(saved));
+                emitToast({ type: 'info', message: 'Activos cargados en local. Pendiente de sincronizar.' });
+            } else {
+                emitToast({ type: 'error', message: 'No se pudieron cargar los activos.' });
+            }
         } finally {
             setLoading(false);
         }
@@ -47,8 +54,10 @@ export const AssetsProvider = ({ children }) => {
         try {
             const created = await api.createAsset(newAsset);
             setAssets(prev => [created, ...prev]);
+            emitToast({ type: 'success', message: 'Activo creado correctamente.' });
         } catch (error) {
             setAssets(prev => [{ ...newAsset, id: Date.now().toString() }, ...prev]);
+            emitToast({ type: 'info', message: 'Activo guardado en local. Pendiente de sincronizar.' });
         }
     };
 
@@ -56,8 +65,10 @@ export const AssetsProvider = ({ children }) => {
         try {
             await api.updateAsset(id, data);
             setAssets(prev => prev.map(a => a.id === id ? { ...a, ...data } : a));
+            emitToast({ type: 'success', message: 'Activo actualizado.' });
         } catch (error) {
             setAssets(prev => prev.map(a => a.id === id ? { ...a, ...data } : a));
+            emitToast({ type: 'info', message: 'Cambios guardados en local. Pendiente de sincronizar.' });
         }
     };
 
@@ -65,8 +76,10 @@ export const AssetsProvider = ({ children }) => {
         try {
             await api.deleteAsset(id);
             setAssets(prev => prev.filter(a => a.id !== id));
+            emitToast({ type: 'success', message: 'Activo eliminado.' });
         } catch (error) {
             setAssets(prev => prev.filter(a => a.id !== id));
+            emitToast({ type: 'info', message: 'Activo eliminado en local. Pendiente de sincronizar.' });
         }
     };
 

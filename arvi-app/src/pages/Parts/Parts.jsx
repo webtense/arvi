@@ -1,17 +1,17 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Card } from '../../components/Card/Card';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '../../components/Button/Button';
-import { Plus, Send, Trash2, X, FileText, CheckCircle, ClipboardList, FileCheck } from 'lucide-react';
+import { Plus, Send, Trash2, FileText, CheckCircle, ClipboardList, FileCheck } from 'lucide-react';
 import { useSettings } from '../../context/SettingsContext';
 import { useAccounting } from '../../context/AccountingContext';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { emitToast } from '../../utils/toast';
 import './Parts.css';
 
 export const Parts = () => {
     const { t } = useTranslation();
     const { settings } = useSettings();
-    const { parts, budgets, convertToInvoice } = useAccounting();
+    const { parts, budgets, convertToInvoice, addPart } = useAccounting();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('partes');
     const canvasRef = useRef(null);
@@ -101,7 +101,7 @@ export const Parts = () => {
 
     const handleSave = () => {
         if (!customer) {
-            alert('Por favor, indica el cliente.');
+            emitToast({ type: 'error', message: 'Por favor, indica el cliente.' });
             return;
         }
 
@@ -127,7 +127,6 @@ export const Parts = () => {
         };
 
         addPart(newPart);
-        alert('Parte creado correctamente.');
         resetForm();
     };
 
@@ -379,4 +378,3 @@ export const Parts = () => {
         </div>
     );
 };
-

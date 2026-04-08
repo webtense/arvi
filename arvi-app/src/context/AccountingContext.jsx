@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+/* eslint-disable react/prop-types */
+import { createContext, useContext, useState, useEffect } from 'react';
 import api from '../services/api';
+import { emitToast } from '../utils/toast';
 
 const AccountingContext = createContext();
 
@@ -45,6 +47,12 @@ export const AccountingProvider = ({ children }) => {
             if (savedInvoices) setInvoices(JSON.parse(savedInvoices));
             if (savedBudgets) setBudgets(JSON.parse(savedBudgets));
             if (savedParts) setParts(JSON.parse(savedParts));
+
+            if (savedInvoices || savedBudgets || savedParts) {
+                emitToast({ type: 'info', message: 'Datos contables cargados en local. Pendiente de sincronizar.' });
+            } else {
+                emitToast({ type: 'error', message: 'No se pudieron cargar los datos contables.' });
+            }
         } finally {
             setLoading(false);
         }
@@ -99,10 +107,13 @@ export const AccountingProvider = ({ children }) => {
                 await api.updatePart(source.id, { status: 'invoiced' });
                 setParts(prev => prev.map(p => p.id === source.id ? { ...p, status: 'invoiced' } : p));
             }
+
+            emitToast({ type: 'success', message: 'Factura creada correctamente.' });
             
             return created;
         } catch (error) {
             setInvoices(prev => [{ ...newInvoice, id: Date.now().toString() }, ...prev]);
+            emitToast({ type: 'info', message: 'Factura guardada en local. Pendiente de sincronizar.' });
             return newInvoice;
         }
     };
@@ -125,8 +136,10 @@ export const AccountingProvider = ({ children }) => {
         try {
             await api.finalizeInvoice(invoiceId);
             setInvoices(prev => prev.map(inv => inv.id === invoiceId ? { ...inv, ...updatedInvoice } : inv));
+            emitToast({ type: 'success', message: 'Factura finalizada correctamente.' });
         } catch (error) {
             setInvoices(prev => prev.map(inv => inv.id === invoiceId ? { ...inv, ...updatedInvoice } : inv));
+            emitToast({ type: 'info', message: 'Factura finalizada en local. Pendiente de sincronizar.' });
         }
     };
 
@@ -139,8 +152,10 @@ export const AccountingProvider = ({ children }) => {
         try {
             const created = await api.createPart(partData);
             setParts(prev => [created, ...prev]);
+            emitToast({ type: 'success', message: 'Parte guardado correctamente.' });
         } catch (error) {
             setParts(prev => [{ ...partData, id: Date.now().toString() }, ...prev]);
+            emitToast({ type: 'info', message: 'Parte guardado en local. Pendiente de sincronizar.' });
         }
     };
 
@@ -152,8 +167,10 @@ export const AccountingProvider = ({ children }) => {
         try {
             const created = await api.createInvoice(invoiceData);
             setInvoices(prev => [created, ...prev]);
+            emitToast({ type: 'success', message: 'Factura en borrador creada correctamente.' });
         } catch (error) {
             setInvoices(prev => [{ ...invoiceData, id: Date.now().toString() }, ...prev]);
+            emitToast({ type: 'info', message: 'Factura guardada en local. Pendiente de sincronizar.' });
         }
     };
 

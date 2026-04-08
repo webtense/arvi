@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '../../components/Card/Card';
 import { Button } from '../../components/Button/Button';
 import { Camera, Upload, ScanLine, CheckCircle, Clock, TrendingUp, DollarSign, Tag, FileText } from 'lucide-react';
 import { createWorker } from 'tesseract.js';
 import { useTickets } from '../../context/TicketsContext';
+import { emitToast } from '../../utils/toast';
 import './Tickets.css';
 
 export const Tickets = () => {
-    const { tickets, projects, loading, addTicket, closeMonth } = useTickets();
+    const { tickets, projects, addTicket, closeMonth } = useTickets();
     const [isScanning, setIsScanning] = useState(false);
     const [scanProgress, setScanProgress] = useState(0);
     const [scannedTickets, setScannedTickets] = useState([]);
@@ -92,6 +93,7 @@ export const Tickets = () => {
             }, ...scannedTickets]);
         } catch (error) {
             console.error('Error in OCR:', error);
+            emitToast({ type: 'info', message: 'OCR no disponible. Se usa captura rapida manual.' });
             // Fallback mock if OCR fails for any reason
             handleScanMock();
         } finally {
@@ -131,9 +133,13 @@ export const Tickets = () => {
 
     const handleCloseCurrentMonth = async () => {
         const now = new Date();
-        const result = await closeMonth(now.getFullYear(), now.getMonth() + 1);
-        if (result?.zipUrl) {
-            window.open(result.zipUrl, '_blank');
+        try {
+            const result = await closeMonth(now.getFullYear(), now.getMonth() + 1);
+            if (result?.zipUrl) {
+                window.open(result.zipUrl, '_blank');
+            }
+        } catch (error) {
+            // Toast handled in context
         }
     };
 
