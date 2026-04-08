@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import i18n from '../i18n/config';
 
 const SettingsContext = createContext(null);
 
@@ -6,6 +7,7 @@ export const SettingsProvider = ({ children }) => {
     const [settings, setSettings] = useState(() => {
         const savedSettings = localStorage.getItem('arviSettings');
         return savedSettings ? JSON.parse(savedSettings) : {
+            language: 'ca',
             displacementPrice: 20,
             tech1Rate: 45,
             assistantRate: 30,
@@ -17,6 +19,12 @@ export const SettingsProvider = ({ children }) => {
             }
         };
     });
+
+    useEffect(() => {
+        if (settings.language) {
+            i18n.changeLanguage(settings.language);
+        }
+    }, [settings.language]);
 
     useEffect(() => {
         localStorage.setItem('arviSettings', JSON.stringify(settings));

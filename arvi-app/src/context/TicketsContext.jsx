@@ -14,6 +14,7 @@ export const useTickets = () => {
 export const TicketsProvider = ({ children }) => {
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [projects, setProjects] = useState([]);
 
     const fetchFromAPI = async () => {
         try {
@@ -24,8 +25,12 @@ export const TicketsProvider = ({ children }) => {
                 return;
             }
 
-            const ticketsData = await api.getTickets();
+            const [ticketsData, projectsData] = await Promise.all([
+                api.getTickets(),
+                api.getProjects().catch(() => [])
+            ]);
             setTickets(ticketsData || []);
+            setProjects(projectsData || []);
         } catch (error) {
             console.error('Error fetching tickets:', error);
             const saved = localStorage.getItem('arvi_tickets');
@@ -47,7 +52,7 @@ export const TicketsProvider = ({ children }) => {
         const ticketData = {
             ...newTicket,
             date: new Date().toISOString().split('T')[0],
-            status: 'processing'
+            status: 'verified'
         };
         try {
             const created = await api.createTicket(ticketData);
@@ -75,8 +80,12 @@ export const TicketsProvider = ({ children }) => {
         }
     };
 
+    const closeMonth = async (year, month) => {
+        return api.closeTicketMonth(year, month);
+    };
+
     return (
-        <TicketsContext.Provider value={{ tickets, loading, addTicket, updateTicket, deleteTicket }}>
+        <TicketsContext.Provider value={{ tickets, projects, loading, addTicket, updateTicket, deleteTicket, closeMonth }}>
             {children}
         </TicketsContext.Provider>
     );

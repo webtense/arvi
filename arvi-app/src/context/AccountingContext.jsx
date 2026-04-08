@@ -77,7 +77,7 @@ export const AccountingProvider = ({ children }) => {
             client: source.client,
             description: source.work || source.description || 'Facturación de servicios',
             items: source.items || [
-                { id: 1, description: source.work || 'Trabajos realizados', quantity: 1, price: source.total || 0, tax: 21, total: source.total || 0 }
+                { id: 1, description: source.work || 'Trabajos realizados', quantity: 1, unitPrice: source.total || 0, tax: 21, total: source.total || 0 }
             ],
             subtotal: source.total || 0,
             taxTotal: (source.total || 0) * 0.21,
@@ -123,7 +123,7 @@ export const AccountingProvider = ({ children }) => {
         };
 
         try {
-            await api.updateInvoice(invoiceId, updatedInvoice);
+            await api.finalizeInvoice(invoiceId);
             setInvoices(prev => prev.map(inv => inv.id === invoiceId ? { ...inv, ...updatedInvoice } : inv));
         } catch (error) {
             setInvoices(prev => prev.map(inv => inv.id === invoiceId ? { ...inv, ...updatedInvoice } : inv));

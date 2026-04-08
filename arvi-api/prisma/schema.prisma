@@ -18,44 +18,142 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
+model Project {
+  id          Int       @id @default(autoincrement())
+  name        String
+  client      String?
+  address     String?
+  status      String    @default("active")
+  description String?
+  budget      Float?
+  startDate   DateTime?
+  endDate    DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  tickets     Ticket[]
+  budgets     Budget[]
+  parts       Part[]
+  invoices    Invoice[]
+}
+
 model Invoice {
-  id           Int      @id @default(autoincrement())
-  invoiceNumber String  @unique
+  id           Int       @id @default(autoincrement())
+  invoiceNumber String   @unique
   date         DateTime
-  client       String
-  description  String?
-  items        Json?
+  dueDate      DateTime?
+  client      String
+  clientCif   String?
+  clientAddress String?
+  description String?
+  items        InvoiceItem[]
   subtotal     Float
-  taxTotal     Float
-  total        Float
-  status       String
-  type         String
-  hash         String?
-  prevHash     String?
-  finalDate    DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  taxRate     Float     @default(21)
+  taxTotal    Float
+  total       Float
+  status      String   @default("draft")
+  type        String   @default("invoice")
+  hash        String?
+  prevHash    String?
+  finalDate   DateTime?
+  projectId   Int?
+  project    Project?  @relation(fields: [projectId], references: [id])
+  provider   String?
+  providerCif String?
+  notes      String?
+  paymentMethod String?
+  paymentStatus String  @default("pending")
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model InvoiceItem {
+  id          Int     @id @default(autoincrement())
+  invoiceId   Int
+  invoice    Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description String
+  quantity   Float   @default(1)
+  unit       String   @default("ud")
+  unitPrice  Float
+  tax        Float   @default(21)
+  total      Float
+  createdAt  DateTime @default(now())
 }
 
 model Budget {
-  id        Int      @id @default(autoincrement())
-  client    String
-  total     Float
-  status    String
-  date      DateTime
-  items     Json?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int        @id @default(autoincrement())
+  budgetNumber String     @unique
+  client      String
+  clientCif  String?
+  clientAddress String?
+  clientPhone String?
+  clientEmail String?
+  date       DateTime
+  validityDays Int       @default(30)
+  status      String    @default("draft")
+  items       BudgetItem[]
+  subtotal    Float
+  taxRate    Float     @default(21)
+  taxTotal   Float
+  total      Float
+  notes      String?
+  projectId   Int?
+  project    Project?  @relation(fields: [projectId], references: [id])
+  sourceType String?
+  sourceId   Int?
+  sentAt    DateTime?
+  acceptedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model BudgetItem {
+  id         Int     @id @default(autoincrement())
+  budgetId   Int
+  budget     Budget  @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  category   String
+  description String
+  quantity   Float   @default(1)
+  unit       String  @default("ud")
+  unitPrice  Float
+  tax        Float   @default(21)
+  total      Float
+  createdAt  DateTime @default(now())
 }
 
 model Part {
-  id        Int      @id @default(autoincrement())
-  client    String
-  work      String
-  status    String
-  date      DateTime
+  id          Int       @id @default(autoincrement())
+  partNumber   String    @unique
+  client      String
+  projectId   Int?
+  project     Project?  @relation(fields: [projectId], references: [id])
+  work        String
+  status     String   @default("pending")
+  date       DateTime
+  startTime   String?
+  endTime    String?
+  technicians Int      @default(1)
+  hours      Float?
+  materialCost Float?
+  serviceFee Float?
+  items      PartItem[]
+  signatureImage String?
+  clientSignature String?
+  signedAt   DateTime?
+  invoicedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model PartItem {
+  id        Int     @id @default(autoincrement())
+  partId    Int
+  part      Part    @relation(fields: [partId], references: [id], onDelete: Cascade)
+  material  String
+  quantity  Float   @default(1)
+  unit      String  @default("ud")
+  unitPrice Float
+  total     Float
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model Asset {
@@ -63,19 +161,62 @@ model Asset {
   name        String
   description String?
   location    String?
-  status      String
+  serialNumber String?
+  status      String   @default("active")
+  purchaseDate DateTime?
+  warrantyEnd  DateTime?
+  notes       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
 model Ticket {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   client      String
   amount      Float
   category    String
+  subcategory String?
   description String?
   date        DateTime
-  status      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  status     String    @default("pending")
+  imageUrl   String?
+  projectId  Int?
+  project    Project?  @relation(fields: [projectId], references: [id])
+  invoiceId  Int?
+  vendor     String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Subcontractor {
+  id            Int       @id @default(autoincrement())
+  name          String
+  cif           String    @unique
+  email         String?
+  phone         String?
+  address       String?
+  contactPerson String?
+  contactPhone  String?
+  contactEmail String?
+  paymentMethod String?
+  accountNumber String?
+  bic          String?
+  notes         String?
+  status       String   @default("active")
+  rating        Float     @default(5.0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model MonthlyClose {
+  id          Int      @id @default(autoincrement())
+  year        Int
+  month      Int
+  ticketCount Int
+  totalAmount Float
+  pdfUrl     String?
+  zipUrl     String?
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

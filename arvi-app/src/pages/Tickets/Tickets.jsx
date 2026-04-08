@@ -7,10 +7,11 @@ import { useTickets } from '../../context/TicketsContext';
 import './Tickets.css';
 
 export const Tickets = () => {
-    const { tickets, loading, addTicket } = useTickets();
+    const { tickets, projects, loading, addTicket, closeMonth } = useTickets();
     const [isScanning, setIsScanning] = useState(false);
     const [scanProgress, setScanProgress] = useState(0);
     const [scannedTickets, setScannedTickets] = useState([]);
+    const [selectedProjectId, setSelectedProjectId] = useState('');
 
     useEffect(() => {
         if (tickets.length > 0) {
@@ -20,17 +21,18 @@ export const Tickets = () => {
                 date: new Date(t.date).toLocaleDateString(),
                 amount: t.amount + ' €',
                 category: t.category,
-                status: t.status
+                status: t.status,
+                imageUrl: t.imageUrl
             })));
         }
     }, [tickets]);
 
     const detectCategory = (text) => {
         const lowerText = text.toLowerCase();
-        if (/gasoil|diesel|gasolina|repsol|cepsa|bp|shell/i.test(lowerText)) return 'Gasoil';
-        if (/restaurante|menu|cafe|comida|cena|poke|burger|pizza/i.test(lowerText)) return 'Comida';
-        if (/ferreteria|tornillo|tubo|pintura|material|bauhaus|leroy/i.test(lowerText)) return 'Material';
-        return 'Otros';
+        if (/gasoil|diesel|gasolina|repsol|cepsa|bp|shell/i.test(lowerText)) return 'gasolina';
+        if (/restaurante|menu|cafe|comida|cena|poke|burger|pizza|bar/i.test(lowerText)) return 'restauracion';
+        if (/amazon|carrefour|mercadona|ferreteria|tornillo|tubo|pintura|material|bauhaus|leroy|ikea|compra/i.test(lowerText)) return 'compras';
+        return 'otros';
     };
 
     const extractAmount = (text) => {
@@ -61,12 +63,20 @@ export const Tickets = () => {
             const category = detectCategory(text);
             const amountStr = extractAmount(text);
             const amount = parseFloat(amountStr.replace(' €', '').replace(',', '.'));
+            const imageData = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
 
             const newTicketData = {
                 client: merchant.substring(0, 25),
                 amount: amount,
                 category: category,
-                description: text.substring(0, 200)
+                description: text.substring(0, 200),
+                projectId: selectedProjectId ? parseInt(selectedProjectId) : undefined,
+                imageData
             };
 
             await addTicket(newTicketData);
@@ -77,7 +87,8 @@ export const Tickets = () => {
                 date: new Date().toLocaleDateString(),
                 amount: amountStr,
                 category: category,
-                status: 'verified'
+                status: 'verified',
+                imageUrl: imageData
             }, ...scannedTickets]);
         } catch (error) {
             console.error('Error in OCR:', error);
@@ -118,6 +129,14 @@ export const Tickets = () => {
         ]
     };
 
+    const handleCloseCurrentMonth = async () => {
+        const now = new Date();
+        const result = await closeMonth(now.getFullYear(), now.getMonth() + 1);
+        if (result?.zipUrl) {
+            window.open(result.zipUrl, '_blank');
+        }
+    };
+
     return (
         <div className="tickets-page">
             <header className="page-header">
@@ -125,6 +144,7 @@ export const Tickets = () => {
                     <h2>Gastos y Tickets</h2>
                     <p className="text-muted">Digitaliza tus tickets comerciales al instante mediante OCR.</p>
                 </div>
+                <Button variant="outline" onClick={handleCloseCurrentMonth}>Cerrar mes y comprimir</Button>
             </header>
 
             <div className="tickets-grid">
@@ -174,6 +194,17 @@ export const Tickets = () => {
                             )}
                         </div>
                         <div className="scanner-actions">
+                            <select
+                                className="form-control"
+                                value={selectedProjectId}
+                                onChange={(e) => setSelectedProjectId(e.target.value)}
+                                style={{ marginBottom: '10px' }}
+                            >
+                                <option value="">Sin proyecto</option>
+                                {projects.map((p) => (
+                                    <option key={p.id} value={p.id}>{p.name}</option>
+                                ))}
+                            </select>
                             <label className="btn btn-outline full-width" style={{ cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                                 <Upload size={18} /> Subir desde Galería
                                 <input type="file" accept="image/*" onChange={handleFileSelect} style={{ display: 'none' }} />
@@ -187,10 +218,10 @@ export const Tickets = () => {
                         {scannedTickets.map(ticket => (
                             <li key={ticket.id} className="ticket-item">
                                 <div className="ticket-icon-wrapper">
-                                    {ticket.category === 'Gasoil' && <TrendingUp size={18} className="cat-icon-gas" />}
-                                    {ticket.category === 'Comida' && <DollarSign size={18} className="cat-icon-food" />}
-                                    {ticket.category === 'Material' && <Tag size={18} className="cat-icon-mat" />}
-                                    {ticket.category === 'Otros' && <FileText size={18} className="cat-icon-other" />}
+                                    {ticket.category === 'gasolina' && <TrendingUp size={18} className="cat-icon-gas" />}
+                                    {ticket.category === 'restauracion' && <DollarSign size={18} className="cat-icon-food" />}
+                                    {ticket.category === 'compras' && <Tag size={18} className="cat-icon-mat" />}
+                                    {ticket.category === 'otros' && <FileText size={18} className="cat-icon-other" />}
                                 </div>
                                 <div className="ticket-info">
                                     <div className="ticket-merchant">{ticket.merchant}</div>
@@ -200,6 +231,9 @@ export const Tickets = () => {
                                 </div>
                                 <div className="ticket-meta">
                                     <div className="ticket-amount">{ticket.amount}</div>
+                                    {ticket.imageUrl && (
+                                        <a href={ticket.imageUrl} target="_blank" rel="noreferrer" className="text-muted text-sm">Descargar</a>
+                                    )}
                                     <div className="ticket-status">
                                         {ticket.status === 'verified'
                                             ? <span className="status-badge success"><CheckCircle size={14} /> Verificado</span>

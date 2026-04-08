@@ -26,6 +26,17 @@ export const Settings = () => {
                 <Card title="Tarifas y Precios" icon={<Calculator size={20} />}>
                     <div className="settings-form">
                         <div className="form-group">
+                            <label>Idioma por defecto</label>
+                            <select
+                                className="form-control"
+                                value={settings.language || 'ca'}
+                                onChange={(e) => updateSettings({ language: e.target.value })}
+                            >
+                                <option value="ca">Català</option>
+                                <option value="es">Español</option>
+                            </select>
+                        </div>
+                        <div className="form-group">
                             <label>Precio Disposición de Servicio (€)</label>
                             <input
                                 type="number"

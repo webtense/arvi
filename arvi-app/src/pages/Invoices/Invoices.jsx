@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card } from '../../components/Card/Card';
 import { Button } from '../../components/Button/Button';
-import { FileText, Printer, ChevronLeft, CheckCircle, AlertTriangle, Download, Upload } from 'lucide-react';
+import { FileText, Printer, ChevronLeft, CheckCircle, AlertTriangle, Download, Upload, Plus } from 'lucide-react';
 import { useAccounting } from '../../context/AccountingContext';
 import { QRCodeSVG } from 'qrcode.react';
 import './Invoices.css';
@@ -48,7 +48,7 @@ export const Invoices = () => {
             client: newInvClient,
             description: newInvDesc || 'Servicios directos',
             items: [
-                { id: 1, description: newInvDesc || 'Trabajos realizados', quantity: 1, price: amount, tax: 21, total: amount }
+                { id: 1, description: newInvDesc || 'Trabajos realizados', quantity: 1, unitPrice: amount, tax: 21, total: amount }
             ],
             subtotal: amount,
             taxTotal: amount * 0.21,
@@ -66,7 +66,8 @@ export const Invoices = () => {
 
     const filteredInvoices = invoices.filter(inv => {
         if (filter === 'all') return true;
-        return inv.type === filter;
+        if (filter === 'draft') return inv.status === 'draft' || inv.type === 'draft';
+        return inv.status === 'finalized' || inv.type === 'definitive';
     });
 
     const renderInvoicePreview = (inv) => {
@@ -120,7 +121,7 @@ export const Invoices = () => {
                         <p style={{ margin: '5px 0' }}>Data: <strong>{inv.finalDate || inv.date}</strong></p>
                     </div>
                     
-                    {inv.type === 'definitive' && (
+                                     {(inv.status === 'finalized' || inv.type === 'definitive') && (
                         <div style={{ textAlign: 'right' }}>
                             <QRCodeSVG value={verifactuUrl} size={80} />
                             <p style={{ fontSize: '0.6rem', margin: '5px 0 0 0' }}>VERI*FACTU</p>
@@ -151,7 +152,7 @@ export const Invoices = () => {
                                     ) : item.description}
                                 </td>
                                 <td style={{ textAlign: 'center', padding: '15px 0' }}>{item.quantity.toFixed(3)}</td>
-                                <td style={{ textAlign: 'right', padding: '15px 0' }}>{item.price.toFixed(2)}</td>
+                                <td style={{ textAlign: 'right', padding: '15px 0' }}>{(item.unitPrice ?? item.price ?? 0).toFixed(2)}</td>
                                 <td style={{ textAlign: 'right', padding: '15px 0' }}>IVA {item.tax}%</td>
                                 <td style={{ textAlign: 'right', padding: '15px 0' }}>{item.total.toFixed(2)} €</td>
                             </tr>
@@ -180,7 +181,7 @@ export const Invoices = () => {
                 </div>
 
                 {/* Verifactu Signature/Hash Chaining */}
-                {inv.type === 'definitive' && (
+                {(inv.status === 'finalized' || inv.type === 'definitive') && (
                     <div style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f9f9f9', border: '1px solid #ddd', borderRadius: '4px', fontSize: '0.65rem', overflowWrap: 'break-word', fontFamily: 'monospace' }}>
                         <strong>REGISTRO VERI*FACTU:</strong><br />
                         HASH: {inv.hash}<br />
@@ -205,7 +206,7 @@ export const Invoices = () => {
                         <ChevronLeft size={16} /> Volver al Listado
                     </Button>
                     <div style={{ display: 'flex', gap: '10px' }}>
-                        {selectedInvoice.type === 'draft' && (
+                        {(selectedInvoice.status === 'draft' || selectedInvoice.type === 'draft') && (
                             <Button variant="primary" onClick={() => setShowConfirmModal(true)}>
                                 <CheckCircle size={16} /> Confirmar Factura Definitiva
                             </Button>
@@ -323,8 +324,8 @@ export const Invoices = () => {
                                     <td style={{ padding: '15px 10px' }}>{inv.finalDate || inv.date}</td>
                                     <td style={{ padding: '15px 10px' }}>{inv.total.toFixed(2)} €</td>
                                     <td style={{ padding: '15px 10px' }}>
-                                        <span className={`status-badge ${inv.type}`}>
-                                            {inv.type === 'draft' ? 'Borrador' : 'Definitiva'}
+                                        <span className={`status-badge ${inv.status === 'finalized' ? 'definitive' : 'draft'}`}>
+                                            {inv.status === 'finalized' || inv.type === 'definitive' ? 'Definitiva' : 'Borrador'}
                                         </span>
                                     </td>
                                     <td style={{ padding: '15px 10px', textAlign: 'right' }}>

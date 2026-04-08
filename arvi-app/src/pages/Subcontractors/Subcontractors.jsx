@@ -1,31 +1,173 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Card } from '../../components/Card/Card';
-import { HardHat } from 'lucide-react';
+import { Button } from '../../components/Button/Button';
+import { HardHat, Pencil, Trash2, PlusCircle } from 'lucide-react';
+import api from '../../services/api';
+
+const emptyForm = {
+    name: '',
+    cif: '',
+    contactPerson: '',
+    contactPhone: '',
+    contactEmail: '',
+    paymentMethod: '',
+    accountNumber: '',
+    notes: '',
+    status: 'active'
+};
 
 export const Subcontractors = () => {
+    const [items, setItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [form, setForm] = useState(emptyForm);
+    const [editingId, setEditingId] = useState(null);
+    const [query, setQuery] = useState('');
+
+    const load = async () => {
+        try {
+            setLoading(true);
+            const data = await api.getSubcontractors();
+            setItems(data || []);
+        } catch (error) {
+            const local = localStorage.getItem('arvi_subcontractors');
+            if (local) setItems(JSON.parse(local));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        load();
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem('arvi_subcontractors', JSON.stringify(items));
+    }, [items]);
+
+    const filtered = useMemo(() => {
+        if (!query) return items;
+        const q = query.toLowerCase();
+        return items.filter((s) =>
+            [s.name, s.cif, s.contactPerson, s.contactPhone].some((field) =>
+                (field || '').toLowerCase().includes(q)
+            )
+        );
+    }, [items, query]);
+
+    const onChange = (field, value) => {
+        setForm((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const onSubmit = async (e) => {
+        e.preventDefault();
+        if (!form.name || !form.cif) return;
+
+        try {
+            if (editingId) {
+                const updated = await api.updateSubcontractor(editingId, form);
+                setItems((prev) => prev.map((s) => (s.id === editingId ? updated : s)));
+            } else {
+                const created = await api.createSubcontractor(form);
+                setItems((prev) => [created, ...prev]);
+            }
+        } catch (error) {
+            if (editingId) {
+                setItems((prev) => prev.map((s) => (s.id === editingId ? { ...s, ...form } : s)));
+            } else {
+                setItems((prev) => [{ id: Date.now(), ...form }, ...prev]);
+            }
+        }
+
+        setForm(emptyForm);
+        setEditingId(null);
+    };
+
+    const startEdit = (item) => {
+        setEditingId(item.id);
+        setForm({
+            name: item.name || '',
+            cif: item.cif || '',
+            contactPerson: item.contactPerson || '',
+            contactPhone: item.contactPhone || '',
+            contactEmail: item.contactEmail || '',
+            paymentMethod: item.paymentMethod || '',
+            accountNumber: item.accountNumber || '',
+            notes: item.notes || '',
+            status: item.status || 'active'
+        });
+    };
+
+    const remove = async (id) => {
+        try {
+            await api.deleteSubcontractor(id);
+        } catch (error) {
+            // fallback local only
+        }
+        setItems((prev) => prev.filter((s) => s.id !== id));
+    };
+
     return (
         <div className="dashboard">
-            <header className="page-header">
+            <header className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
                 <div>
                     <h2>Subcontratas Externas</h2>
-                    <p className="text-muted">Gestiona el trabajo delegado a otros profesionales.</p>
+                    <p className="text-muted">Crea, edita y gestiona los datos fiscales, contacto y pago.</p>
                 </div>
+                <input
+                    className="form-control"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Buscar por nombre, CIF o contacto"
+                    style={{ maxWidth: '320px' }}
+                />
             </header>
-            <Card title="Directorio de Profesionales">
-                <ul className="project-list">
-                    <li className="project-item">
-                        <div className="project-info" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <HardHat size={32} color="#f39c12" />
-                            <div>
-                                <h4>Instalaciones Eléctricas Ruiz</h4>
-                                <span className="project-status">Electricista - 3 Tickets asignados</span>
-                            </div>
-                        </div>
-                        <div className="project-meta">
-                            <span className="project-expected" style={{ color: 'red' }}>Saldo Deudor: 340 €</span>
-                        </div>
-                    </li>
-                </ul>
+
+            <Card title={editingId ? 'Editar subcontrata' : 'Nueva subcontrata'}>
+                <form onSubmit={onSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                    <input className="form-control" placeholder="Nombre" value={form.name} onChange={(e) => onChange('name', e.target.value)} required />
+                    <input className="form-control" placeholder="CIF" value={form.cif} onChange={(e) => onChange('cif', e.target.value.toUpperCase())} required />
+                    <input className="form-control" placeholder="Persona de contacto" value={form.contactPerson} onChange={(e) => onChange('contactPerson', e.target.value)} />
+                    <input className="form-control" placeholder="Teléfono contacto" value={form.contactPhone} onChange={(e) => onChange('contactPhone', e.target.value)} />
+                    <input className="form-control" placeholder="Email contacto" value={form.contactEmail} onChange={(e) => onChange('contactEmail', e.target.value)} />
+                    <input className="form-control" placeholder="Forma de pago" value={form.paymentMethod} onChange={(e) => onChange('paymentMethod', e.target.value)} />
+                    <input className="form-control" placeholder="Número de cuenta (IBAN)" value={form.accountNumber} onChange={(e) => onChange('accountNumber', e.target.value)} />
+                    <select className="form-control" value={form.status} onChange={(e) => onChange('status', e.target.value)}>
+                        <option value="active">Activa</option>
+                        <option value="inactive">Inactiva</option>
+                    </select>
+                    <textarea className="form-control" rows="2" placeholder="Notas" value={form.notes} onChange={(e) => onChange('notes', e.target.value)} style={{ gridColumn: '1 / -1' }} />
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <Button type="submit" variant="primary"><PlusCircle size={16} /> {editingId ? 'Guardar cambios' : 'Crear subcontrata'}</Button>
+                        {editingId && <Button type="button" variant="secondary" onClick={() => { setEditingId(null); setForm(emptyForm); }}>Cancelar</Button>}
+                    </div>
+                </form>
+            </Card>
+
+            <Card title="Directorio de Subcontratas" style={{ marginTop: '16px' }}>
+                {loading ? (
+                    <p className="text-muted">Cargando...</p>
+                ) : filtered.length === 0 ? (
+                    <p className="text-muted">No hay subcontratas registradas.</p>
+                ) : (
+                    <ul className="project-list">
+                        {filtered.map((item) => (
+                            <li className="project-item" key={item.id}>
+                                <div className="project-info" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <HardHat size={28} color="#f39c12" />
+                                    <div>
+                                        <h4>{item.name}</h4>
+                                        <span className="project-status">{item.cif} · {item.contactPerson || 'Sin contacto'} · {item.contactPhone || '-'}</span>
+                                        <div className="text-muted" style={{ fontSize: '0.85rem' }}>{item.paymentMethod || 'Forma de pago no definida'} · {item.accountNumber || 'Cuenta no definida'}</div>
+                                    </div>
+                                </div>
+                                <div className="project-meta" style={{ display: 'flex', gap: '8px' }}>
+                                    <Button variant="secondary" size="small" onClick={() => startEdit(item)}><Pencil size={14} /> Editar</Button>
+                                    <Button variant="secondary" size="small" onClick={() => remove(item.id)}><Trash2 size={14} /> Eliminar</Button>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                )}
             </Card>
         </div>
     );

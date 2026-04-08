@@ -47,7 +47,7 @@ export const BudgetsProvider = ({ children }) => {
         const budgetData = {
             ...newBudget,
             date: new Date().toISOString().split('T')[0],
-            status: 'pending'
+            status: 'draft'
         };
         try {
             const created = await api.createBudget(budgetData);
@@ -75,8 +75,26 @@ export const BudgetsProvider = ({ children }) => {
         }
     };
 
+    const sendBudget = async (id) => {
+        try {
+            const updated = await api.sendBudget(id);
+            setBudgets(prev => prev.map(b => b.id === id ? updated : b));
+        } catch (error) {
+            setBudgets(prev => prev.map(b => b.id === id ? { ...b, status: 'sent' } : b));
+        }
+    };
+
+    const acceptBudget = async (id) => {
+        try {
+            const updated = await api.acceptBudget(id);
+            setBudgets(prev => prev.map(b => b.id === id ? updated : b));
+        } catch (error) {
+            setBudgets(prev => prev.map(b => b.id === id ? { ...b, status: 'accepted' } : b));
+        }
+    };
+
     return (
-        <BudgetsContext.Provider value={{ budgets, loading, addBudget, updateBudget, deleteBudget }}>
+        <BudgetsContext.Provider value={{ budgets, loading, addBudget, updateBudget, deleteBudget, sendBudget, acceptBudget }}>
             {children}
         </BudgetsContext.Provider>
     );

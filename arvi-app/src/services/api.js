@@ -80,6 +80,12 @@ class ApiService {
     });
   }
 
+  async finalizeInvoice(id) {
+    return this.request(`/invoices/${id}/finalize`, {
+      method: 'POST',
+    });
+  }
+
   async deleteInvoice(id) {
     return this.request(`/invoices/${id}`, {
       method: 'DELETE',
@@ -108,6 +114,24 @@ class ApiService {
   async deleteBudget(id) {
     return this.request(`/budgets/${id}`, {
       method: 'DELETE',
+    });
+  }
+
+  async sendBudget(id) {
+    return this.request(`/budgets/${id}/send`, {
+      method: 'POST',
+    });
+  }
+
+  async acceptBudget(id) {
+    return this.request(`/budgets/${id}/accept`, {
+      method: 'POST',
+    });
+  }
+
+  async rejectBudget(id) {
+    return this.request(`/budgets/${id}/reject`, {
+      method: 'POST',
     });
   }
 
@@ -182,6 +206,62 @@ class ApiService {
 
   async deleteTicket(id) {
     return this.request(`/tickets/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async closeTicketMonth(year, month) {
+    return this.request(`/tickets/close-month/${year}/${month}`, {
+      method: 'POST',
+    });
+  }
+
+  // Projects
+  async getProjects() {
+    return this.request('/projects');
+  }
+
+  async createProject(project) {
+    return this.request('/projects', {
+      method: 'POST',
+      body: JSON.stringify(project),
+    });
+  }
+
+  async updateProject(id, project) {
+    return this.request(`/projects/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(project),
+    });
+  }
+
+  async deleteProject(id) {
+    return this.request(`/projects/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Subcontractors
+  async getSubcontractors() {
+    return this.request('/subcontractors');
+  }
+
+  async createSubcontractor(payload) {
+    return this.request('/subcontractors', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async updateSubcontractor(id, payload) {
+    return this.request(`/subcontractors/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async deleteSubcontractor(id) {
+    return this.request(`/subcontractors/${id}`, {
       method: 'DELETE',
     });
   }
