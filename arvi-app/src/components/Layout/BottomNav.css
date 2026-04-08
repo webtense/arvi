@@ -1,24 +1,30 @@
 .bottom-nav {
     display: none;
-    /* Oculto en escritorio */
     position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
     background-color: var(--bg-card);
     border-top: 1px solid var(--border-color);
-    z-index: 100;
+    z-index: 99;
+    padding: 0.5rem 0;
     padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .bottom-nav ul {
     display: flex;
     justify-content: space-around;
-    padding: 0.5rem 0;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    list-style: none;
 }
 
 .bottom-nav li {
     flex: 1;
+    display: flex;
+    justify-content: center;
 }
 
 .bottom-nav-item {
@@ -27,30 +33,56 @@
     align-items: center;
     justify-content: center;
     color: var(--text-muted);
-    transition: color 0.2s ease;
-    padding: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    min-width: 64px;
+    min-height: 44px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
 }
 
-.bottom-nav-item:hover {
-    color: var(--text-main);
+.bottom-nav-item:active {
+    background: var(--bg-card-hover);
+    transform: scale(0.95);
 }
 
 .bottom-nav-item.active {
     color: var(--brand-green);
+    background: rgba(157, 206, 21, 0.1);
 }
 
 .bottom-nav-icon {
-    margin-bottom: 0.25rem;
+    margin-bottom: 2px;
+    display: flex;
 }
 
 .bottom-nav-label {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     font-weight: 500;
+    white-space: nowrap;
+}
+
+/* iPhone notch safe area */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .bottom-nav {
+        padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+    }
 }
 
 /* Mostrar solo en móviles */
 @media (max-width: 768px) {
     .bottom-nav {
         display: block;
+    }
+}
+
+/* Ajustes para iPhone muy pequeño */
+@media (max-width: 360px) {
+    .bottom-nav-item {
+        padding: 0.5rem 0.4rem;
+        min-width: 52px;
+    }
+    
+    .bottom-nav-label {
+        font-size: 0.55rem;
     }
 }

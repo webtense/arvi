@@ -1,14 +1,15 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, ClipboardSignature, Receipt, FileText } from 'lucide-react';
+import { LayoutDashboard, ClipboardSignature, Receipt, FileText, Calculator, Box } from 'lucide-react';
 import './BottomNav.css';
 
 export const BottomNav = () => {
     const navItems = [
-        { path: '/app/dashboard', icon: <LayoutDashboard size={24} />, label: 'Inicio' },
-        { path: '/app/partes', icon: <ClipboardSignature size={24} />, label: 'Partes' },
-        { path: '/app/tickets', icon: <Receipt size={24} />, label: 'Tickets' },
-        { path: '/app/facturas', icon: <FileText size={24} />, label: 'Facturas' }
+        { path: '/app/dashboard', icon: <LayoutDashboard size={22} />, label: 'Inicio' },
+        { path: '/app/partes', icon: <ClipboardSignature size={22} />, label: 'Partes' },
+        { path: '/app/tickets', icon: <Receipt size={22} />, label: 'Tickets' },
+        { path: '/app/facturas', icon: <FileText size={22} />, label: 'Facturas' },
+        { path: '/app/presupuestos', icon: <Calculator size={22} />, label: 'Presup.' },
+        { path: '/app/activos', icon: <Box size={22} />, label: 'Activos' }
     ];
 
     return (
