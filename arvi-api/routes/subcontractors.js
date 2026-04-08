@@ -4,8 +4,11 @@ const authMiddleware = require('../middleware/auth');
 
 const router = Router();
 const prisma = new PrismaClient();
+const authorizeRoles = authMiddleware.authorizeRoles;
 
-router.get('/', authMiddleware, async (req, res) => {
+router.use(authMiddleware, authorizeRoles('admin'));
+
+router.get('/', async (req, res) => {
   try {
     const subcontractors = await prisma.subcontractor.findMany({
       orderBy: { name: 'asc' }
@@ -16,7 +19,7 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-router.get('/:id', authMiddleware, async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const subcontractor = await prisma.subcontractor.findUnique({
@@ -31,7 +34,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const subcontractor = await prisma.subcontractor.create({
       data: req.body
@@ -42,7 +45,7 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 });
 
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const subcontractor = await prisma.subcontractor.update({
@@ -55,7 +58,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     await prisma.subcontractor.delete({

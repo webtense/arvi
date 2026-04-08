@@ -4,8 +4,11 @@ const authMiddleware = require('../middleware/auth');
 
 const router = Router();
 const prisma = new PrismaClient();
+const authorizeRoles = authMiddleware.authorizeRoles;
 
-router.get('/', authMiddleware, async (req, res) => {
+router.use(authMiddleware, authorizeRoles('admin'));
+
+router.get('/', async (req, res) => {
   try {
     const projects = await prisma.project.findMany({
       include: {
@@ -21,7 +24,7 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-router.get('/stats', authMiddleware, async (req, res) => {
+router.get('/stats', async (req, res) => {
   try {
     const active = await prisma.project.count({ where: { status: 'active' } });
     const completed = await prisma.project.count({ where: { status: 'completed' } });
@@ -35,7 +38,7 @@ router.get('/stats', authMiddleware, async (req, res) => {
   }
 });
 
-router.get('/:id', authMiddleware, async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const project = await prisma.project.findUnique({
@@ -56,7 +59,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const project = await prisma.project.create({
       data: req.body
@@ -67,7 +70,7 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 });
 
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const project = await prisma.project.update({
@@ -80,7 +83,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     await prisma.project.delete({

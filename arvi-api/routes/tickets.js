@@ -7,12 +7,15 @@ const { execFile } = require('child_process');
 
 const router = Router();
 const prisma = new PrismaClient();
+const authorizeRoles = authMiddleware.authorizeRoles;
 const storageDir = path.join(__dirname, '..', 'storage');
 const ticketDir = path.join(storageDir, 'tickets');
 const closeDir = path.join(storageDir, 'monthly-close');
 
 if (!fs.existsSync(ticketDir)) fs.mkdirSync(ticketDir, { recursive: true });
 if (!fs.existsSync(closeDir)) fs.mkdirSync(closeDir, { recursive: true });
+
+router.use(authMiddleware, authorizeRoles('admin'));
 
 const detectCategory = (text = '') => {
   const lowerText = text.toLowerCase();
@@ -34,7 +37,7 @@ const saveImageFromDataUrl = (dataUrl, filenamePrefix) => {
   return `/api/tickets/download/${fileName}`;
 };
 
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const { projectId, category, status } = req.query;
     const where = {};
@@ -53,7 +56,7 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const payload = { ...req.body };
     const scanText = payload.description || '';
@@ -74,7 +77,7 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 });
 
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const payload = { ...req.body };
@@ -106,7 +109,7 @@ router.get('/download/:file', async (req, res) => {
   }
 });
 
-router.post('/close-month/:year/:month', authMiddleware, async (req, res) => {
+router.post('/close-month/:year/:month', async (req, res) => {
   try {
     const year = parseInt(req.params.year);
     const month = parseInt(req.params.month);
@@ -176,7 +179,7 @@ router.get('/close-download/:file', async (req, res) => {
   }
 });
 
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     await prisma.ticket.delete({

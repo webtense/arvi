@@ -4,8 +4,11 @@ const authMiddleware = require('../middleware/auth');
 
 const router = Router();
 const prisma = new PrismaClient();
+const authorizeRoles = authMiddleware.authorizeRoles;
 
-router.get('/', authMiddleware, async (req, res) => {
+router.use(authMiddleware, authorizeRoles('admin'));
+
+router.get('/', async (req, res) => {
   try {
     const { status, client, projectId } = req.query;
     const where = {};
@@ -24,7 +27,7 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-router.get('/stats', authMiddleware, async (req, res) => {
+router.get('/stats', async (req, res) => {
   try {
     const draft = await prisma.budget.count({ where: { status: 'draft' } });
     const sent = await prisma.budget.count({ where: { status: 'sent' } });
@@ -43,7 +46,7 @@ router.get('/stats', authMiddleware, async (req, res) => {
   }
 });
 
-router.get('/next-number', authMiddleware, async (req, res) => {
+router.get('/next-number', async (req, res) => {
   try {
     const year = new Date().getFullYear();
     const count = await prisma.budget.count({
@@ -55,7 +58,7 @@ router.get('/next-number', authMiddleware, async (req, res) => {
   }
 });
 
-router.get('/:id', authMiddleware, async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const budget = await prisma.budget.findUnique({
@@ -71,7 +74,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { items, ...budgetData } = req.body;
     
@@ -114,7 +117,7 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 });
 
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { items, ...budgetData } = req.body;
@@ -160,7 +163,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/:id/send', authMiddleware, async (req, res) => {
+router.post('/:id/send', async (req, res) => {
   try {
     const { id } = req.params;
     const budget = await prisma.budget.update({
@@ -176,7 +179,7 @@ router.post('/:id/send', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/:id/accept', authMiddleware, async (req, res) => {
+router.post('/:id/accept', async (req, res) => {
   try {
     const { id } = req.params;
     const budget = await prisma.budget.update({
@@ -192,7 +195,7 @@ router.post('/:id/accept', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/:id/reject', authMiddleware, async (req, res) => {
+router.post('/:id/reject', async (req, res) => {
   try {
     const { id } = req.params;
     const budget = await prisma.budget.update({
@@ -205,7 +208,7 @@ router.post('/:id/reject', authMiddleware, async (req, res) => {
   }
 });
 
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     await prisma.budget.delete({

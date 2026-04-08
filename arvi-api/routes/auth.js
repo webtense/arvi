@@ -6,6 +6,8 @@ const { PrismaClient } = require('@prisma/client');
 const router = Router();
 const prisma = new PrismaClient();
 
+const authMiddleware = require('../middleware/auth');
+
 router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -45,7 +47,7 @@ router.post('/login', async (req, res) => {
 
 router.post('/register', async (req, res) => {
   try {
-    const { username, password, email, role = 'client' } = req.body;
+    const { username, password, email } = req.body;
 
     const existingUser = await prisma.user.findUnique({
       where: { username }
@@ -62,11 +64,33 @@ router.post('/register', async (req, res) => {
         username,
         password: hashedPassword,
         email,
-        role
+        role: 'client'
       }
     });
 
     res.status(201).json({ message: 'Usuario creado correctamente' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
+});
+
+router.get('/me', authMiddleware, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    res.json({ user });
   } catch (error) {
     res.status(500).json({ error: 'Error en el servidor' });
   }

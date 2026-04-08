@@ -4,8 +4,11 @@ const authMiddleware = require('../middleware/auth');
 
 const router = Router();
 const prisma = new PrismaClient();
+const authorizeRoles = authMiddleware.authorizeRoles;
 
-router.get('/', authMiddleware, async (req, res) => {
+router.use(authMiddleware, authorizeRoles('admin'));
+
+router.get('/', async (req, res) => {
   try {
     const parts = await prisma.part.findMany({
       include: { items: true, project: true },
@@ -17,7 +20,7 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { items = [], ...partData } = req.body;
     const year = new Date().getFullYear();
@@ -47,7 +50,7 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 });
 
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { items, ...partData } = req.body;
@@ -83,7 +86,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     await prisma.part.delete({

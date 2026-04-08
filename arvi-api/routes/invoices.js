@@ -4,8 +4,11 @@ const authMiddleware = require('../middleware/auth');
 
 const router = Router();
 const prisma = new PrismaClient();
+const authorizeRoles = authMiddleware.authorizeRoles;
 
-router.get('/', authMiddleware, async (req, res) => {
+router.use(authMiddleware, authorizeRoles('admin'));
+
+router.get('/', async (req, res) => {
   try {
     const { status, type, client, startDate, endDate, projectId } = req.query;
     const where = {};
@@ -28,7 +31,7 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-router.get('/stats', authMiddleware, async (req, res) => {
+router.get('/stats', async (req, res) => {
   try {
     const { year } = req.query;
     const startDate = new Date(`${year || new Date().getFullYear()}-01-01`);
@@ -64,7 +67,7 @@ router.get('/stats', authMiddleware, async (req, res) => {
   }
 });
 
-router.get('/next-number', authMiddleware, async (req, res) => {
+router.get('/next-number', async (req, res) => {
   try {
     const year = new Date().getFullYear();
     const count = await prisma.invoice.count({
@@ -76,7 +79,7 @@ router.get('/next-number', authMiddleware, async (req, res) => {
   }
 });
 
-router.get('/:id', authMiddleware, async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const invoice = await prisma.invoice.findUnique({
@@ -92,7 +95,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { items, ...invoiceData } = req.body;
     
@@ -135,7 +138,7 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 });
 
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { items, ...invoiceData } = req.body;
@@ -180,7 +183,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/:id/finalize', authMiddleware, async (req, res) => {
+router.post('/:id/finalize', async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -209,7 +212,7 @@ router.post('/:id/finalize', authMiddleware, async (req, res) => {
   }
 });
 
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     await prisma.invoice.delete({
