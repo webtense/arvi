@@ -2,12 +2,51 @@ const { Router } = require('express');
 const { prisma } = require('../lib/prisma');
 const authMiddleware = require('../middleware/auth');
 const messages = require('../lib/errors');
+const { validateEmail, validatePhone, validateCifNif, validateIban, sanitizeString } = require('../lib/validation');
 
 const router = Router();
 
 router.use(authMiddleware);
 
-// GET /api/clients - List all clients (with optional search and pagination)
+/**
+ * @swagger
+ * /api/clients:
+ *   get:
+ *     summary: Listar clientes
+ *     tags: [Clients]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Buscar por nombre, CIF o email
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 50
+ *     responses:
+ *       200:
+ *         description: Lista de clientes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Client'
+ *                 pagination:
+ *                   type: object
+ */
 router.get('/', async (req, res, next) => {
   try {
     const { search, page = '1', limit = '50' } = req.query;
@@ -74,12 +113,65 @@ router.get('/:id', async (req, res, next) => {
 });
 
 // POST /api/clients - Create new client
+/**
+ * @swagger
+ * /api/clients:
+ *   post:
+ *     summary: Crear cliente
+ *     tags: [Clients]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *               cif:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Cliente creado
+ *       400:
+ *         description: Error de validación
+ */
 router.post('/', async (req, res, next) => {
   try {
     const { name, cif, email, phone, address, iban, contactPerson, notes } = req.body;
     
     if (!name) {
       return res.status(400).json({ error: messages.CLIENT_NAME_REQUIRED });
+    }
+
+    const validationErrors = [];
+    if (cif) {
+      const cifError = validateCifNif(cif);
+      if (cifError) validationErrors.push(cifError);
+    }
+    if (email) {
+      const emailError = validateEmail(email);
+      if (emailError) validationErrors.push(emailError);
+    }
+    if (phone) {
+      const phoneError = validatePhone(phone);
+      if (phoneError) validationErrors.push(phoneError);
+    }
+    if (iban) {
+      const ibanError = validateIban(iban);
+      if (ibanError) validationErrors.push(ibanError);
+    }
+
+    if (validationErrors.length > 0) {
+      return res.status(400).json({ error: validationErrors.join(', ') });
     }
     
     if (cif) {
@@ -93,14 +185,14 @@ router.post('/', async (req, res, next) => {
     
     const client = await prisma.client.create({
       data: {
-        name,
-        cif,
-        email,
+        name: sanitizeString(name),
+        cif: cif ? cif.toUpperCase() : null,
+        email: email ? email.toLowerCase() : null,
         phone,
-        address,
-        iban,
-        contactPerson,
-        notes
+        address: sanitizeString(address),
+        iban: iban ? iban.replace(/\s/g, '').toUpperCase() : null,
+        contactPerson: sanitizeString(contactPerson),
+        notes: sanitizeString(notes)
       }
     });
     

@@ -67,6 +67,12 @@ app.use('/api/clients', clientsRoutes);
 // Static files (uploads)
 app.use('/api/storage', express.static(path.join(__dirname, 'storage')));
 
+// Swagger documentation
+const { swaggerDocs } = require('./lib/swagger');
+if (process.env.NODE_ENV !== 'production') {
+  swaggerDocs(app);
+}
+
 // Error handling
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 app.use(notFoundHandler);
