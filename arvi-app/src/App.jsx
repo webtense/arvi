@@ -31,6 +31,7 @@ import { BlogProvider } from './context/BlogContext';
 import { AssetsProvider } from './context/AssetsContext';
 import { TicketsProvider } from './context/TicketsContext';
 import { BudgetsProvider } from './context/BudgetsContext';
+import { ClientsProvider } from './context/ClientsContext';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 
 import './i18n/config';
@@ -68,15 +69,17 @@ function AppContent() {
         {/* Aplicación de Administración Protegida */}
         <Route path="/app" element={
           <ProtectedRoute allowedRoles={['admin']}>
-            <AssetsProvider>
-              <TicketsProvider>
-                <BudgetsProvider>
-                  <AccountingProvider>
-                    <AppLayout />
-                  </AccountingProvider>
-                </BudgetsProvider>
-              </TicketsProvider>
-            </AssetsProvider>
+            <ClientsProvider>
+              <AssetsProvider>
+                <TicketsProvider>
+                  <BudgetsProvider>
+                    <AccountingProvider>
+                      <AppLayout />
+                    </AccountingProvider>
+                  </BudgetsProvider>
+                </TicketsProvider>
+              </AssetsProvider>
+            </ClientsProvider>
           </ProtectedRoute>
         }>
           <Route index element={<Navigate to="dashboard" replace />} />

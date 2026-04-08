@@ -112,6 +112,49 @@ class ApiService {
     });
   }
 
+  async cancelInvoice(id, reason) {
+    return this.request(`/invoices/${id}/cancel`, {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
+    });
+  }
+
+  async duplicateInvoice(id) {
+    return this.request(`/invoices/${id}/duplicate`, {
+      method: 'POST',
+    });
+  }
+
+  // Clients
+  async getClients(search) {
+    const query = search ? `?search=${encodeURIComponent(search)}` : '';
+    return this.request(`/clients${query}`);
+  }
+
+  async getClient(id) {
+    return this.request(`/clients/${id}`);
+  }
+
+  async createClient(client) {
+    return this.request('/clients', {
+      method: 'POST',
+      body: JSON.stringify(client),
+    });
+  }
+
+  async updateClient(id, client) {
+    return this.request(`/clients/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(client),
+    });
+  }
+
+  async deleteClient(id) {
+    return this.request(`/clients/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
   // Budgets
   async getBudgets() {
     return this.request('/budgets');

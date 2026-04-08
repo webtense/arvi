@@ -18,6 +18,22 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
+model Client {
+  id            Int       @id @default(autoincrement())
+  name          String
+  cif           String?   @unique
+  email         String?
+  phone         String?
+  address       String?
+  iban          String?
+  contactPerson String?
+  notes         String?
+  status        String    @default("active")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  invoices      Invoice[]
+}
+
 model Project {
   id          Int       @id @default(autoincrement())
   name        String
@@ -37,33 +53,35 @@ model Project {
 }
 
 model Invoice {
-  id           Int       @id @default(autoincrement())
-  invoiceNumber String   @unique
-  date         DateTime
-  dueDate      DateTime?
-  client      String
-  clientCif   String?
+  id            Int       @id @default(autoincrement())
+  invoiceNumber String    @unique
+  date          DateTime
+  dueDate       DateTime?
+  clientName    String
+  clientCif     String?
   clientAddress String?
-  description String?
-  items        InvoiceItem[]
-  subtotal     Float
-  taxRate     Float     @default(21)
-  taxTotal    Float
-  total       Float
-  status      String   @default("draft")
-  type        String   @default("invoice")
-  hash        String?
-  prevHash    String?
-  finalDate   DateTime?
-  projectId   Int?
-  project    Project?  @relation(fields: [projectId], references: [id])
-  provider   String?
-  providerCif String?
-  notes      String?
+  clientId      Int?
+  client        Client?   @relation(fields: [clientId], references: [id])
+  description   String?
+  items         InvoiceItem[]
+  subtotal      Float
+  taxRate       Float     @default(21)
+  taxTotal      Float
+  total         Float
+  status        String    @default("draft")
+  type          String    @default("invoice")
+  hash          String?
+  prevHash      String?
+  finalDate     DateTime?
+  projectId     Int?
+  project       Project?  @relation(fields: [projectId], references: [id])
+  provider      String?
+  providerCif   String?
+  notes         String?
   paymentMethod String?
-  paymentStatus String  @default("pending")
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  paymentStatus String    @default("pending")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model InvoiceItem {

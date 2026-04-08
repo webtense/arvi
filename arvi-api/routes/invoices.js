@@ -187,28 +187,134 @@ router.post('/:id/finalize', async (req, res) => {
   try {
     const { id } = req.params;
     
+    // Verificar que la factura existe y está en estado draft
+    const existingInvoice = await prisma.invoice.findUnique({
+      where: { id: parseInt(id) }
+    });
+    
+    if (!existingInvoice) {
+      return res.status(404).json({ error: 'Factura no encontrada' });
+    }
+    
+    if (existingInvoice.status === 'finalized') {
+      return res.status(400).json({ error: 'La factura ya está finalizada' });
+    }
+    
+    // Obtener la última factura finalizada para el hash
     const lastInvoice = await prisma.invoice.findFirst({
-      where: { status: { in: ['finalized'] } },
+      where: { status: 'finalized' },
       orderBy: { finalDate: 'desc' }
     });
     const prevHash = lastInvoice?.hash || '0000000000000000000000000000000';
     
-    const newHash = Buffer.from(`${id}${prevHash}${Date.now()}`).toString('base64').slice(0, 32);
+    // Generar hash Verifactu (simulación - en producción usar algoritmo real AEAT)
+    const invoiceData = `${existingInvoice.invoiceNumber}${existingInvoice.total}${prevHash}${Date.now()}`;
+    const newHash = require('crypto').createHash('sha256').update(invoiceData).digest('hex').toUpperCase();
 
     const invoice = await prisma.invoice.update({
       where: { id: parseInt(id) },
       data: {
         status: 'finalized',
-        type: 'invoice',
+        type: 'definitive',
         hash: newHash,
         prevHash: prevHash,
         finalDate: new Date()
-      }
+      },
+      include: { items: true }
     });
 
     res.json(invoice);
   } catch (error) {
     res.status(500).json({ error: 'Error al finalizar factura' });
+  }
+});
+
+// Cancelar factura
+router.post('/:id/cancel', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+    
+    const invoice = await prisma.invoice.findUnique({
+      where: { id: parseInt(id) }
+    });
+    
+    if (!invoice) {
+      return res.status(404).json({ error: 'Factura no encontrada' });
+    }
+    
+    if (invoice.status !== 'finalized') {
+      return res.status(400).json({ error: 'Solo se pueden cancelar facturas finalizadas' });
+    }
+    
+    // En Verifactu real, las facturas canceladas se sustituyen por rectificativa
+    const canceled = await prisma.invoice.update({
+      where: { id: parseInt(id) },
+      data: {
+        status: 'cancelled',
+        notes: invoice.notes ? `${invoice.notes}\nCancelada: ${reason}` : `Cancelada: ${reason}`
+      },
+      include: { items: true }
+    });
+    
+    res.json(canceled);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al cancelar factura' });
+  }
+});
+
+// Duplicar factura
+router.post('/:id/duplicate', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const original = await prisma.invoice.findUnique({
+      where: { id: parseInt(id) },
+      include: { items: true }
+    });
+    
+    if (!original) {
+      return res.status(404).json({ error: 'Factura no encontrada' });
+    }
+    
+    const year = new Date().getFullYear();
+    const count = await prisma.invoice.count({
+      where: { invoiceNumber: { startsWith: `${year}/` } }
+    });
+    
+    const duplicate = await prisma.invoice.create({
+      data: {
+        invoiceNumber: `${year}/${(count + 1).toString().padStart(4, '0')}`,
+        date: new Date(),
+        dueDate: original.dueDate,
+        client: original.client,
+        clientCif: original.clientCif,
+        clientAddress: original.clientAddress,
+        description: original.description,
+        subtotal: original.subtotal,
+        taxRate: original.taxRate,
+        taxTotal: original.taxTotal,
+        total: original.total,
+        status: 'draft',
+        type: 'draft',
+        notes: `Duplicada de: ${original.invoiceNumber}`,
+        items: {
+          create: original.items.map(item => ({
+            description: item.description,
+            quantity: item.quantity,
+            unit: item.unit,
+            unitPrice: item.unitPrice,
+            tax: item.tax,
+            total: item.total
+          }))
+        }
+      },
+      include: { items: true }
+    });
+    
+    res.status(201).json(duplicate);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al duplicar factura' });
   }
 });
 
