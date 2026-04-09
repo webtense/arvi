@@ -6,14 +6,23 @@ const path = require('path');
 dotenv.config();
 
 const app = express();
+app.disable('x-powered-by');
 
 // Security middleware
-const { helmetConfig, apiLimiter, authLimiter } = require('./middleware/security');
+const { helmetConfig, apiLimiter, authLimiter, contactLimiter } = require('./middleware/security');
 app.use(helmetConfig);
 
 // CORS - configurable from environment
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim()).filter(Boolean)
+  : ['https://arvimanteniment.com', 'https://www.arvimanteniment.com', 'http://localhost:5173', 'http://localhost:3000'];
+
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:5173', 'http://localhost:3000'],
+  origin(origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(null, false);
+  },
   credentials: true,
 };
 app.use(cors(corsOptions));
@@ -64,7 +73,7 @@ app.use('/api/tickets', ticketsRoutes);
 app.use('/api/projects', projectsRoutes);
 app.use('/api/subcontractors', subcontractorsRoutes);
 app.use('/api/clients', clientsRoutes);
-app.use('/api/contact', contactRoutes);
+app.use('/api/contact', contactLimiter, contactRoutes);
 
 // Static files (uploads)
 app.use('/api/storage', express.static(path.join(__dirname, 'storage')));

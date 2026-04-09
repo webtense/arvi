@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, User, Clock, Calendar, Tag, Share2, Facebook, Twitter, Linkedin, Building2, Quote } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useBlog } from '../../context/BlogContext';
+import { SeoHead } from '../../components/SEO/SeoHead';
 import './Blog.css';
 
 export const BlogPost = () => {
     const { slug } = useParams();
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const { getPostBySlug, posts } = useBlog();
     const [post, setPost] = useState(null);
 
@@ -33,6 +36,25 @@ export const BlogPost = () => {
 
     return (
         <section className="full-section">
+            <SeoHead
+                title={`${post.title} | Blog ARVI`}
+                description={post.excerpt || 'Article del blog dARVI sobre manteniment i reformes a Catalunya.'}
+                path={`/blog/${post.slug || post.id}`}
+                jsonLd={{
+                    '@context': 'https://schema.org',
+                    '@type': 'BlogPosting',
+                    headline: post.title,
+                    datePublished: post.date,
+                    author: {
+                        '@type': 'Person',
+                        name: post.author || 'ARVI'
+                    },
+                    publisher: {
+                        '@type': 'Organization',
+                        name: 'ARVI Manteniments Integrals'
+                    }
+                }}
+            />
             <div className="section-inner">
                 <article className="blog-article-full">
                     <header className="article-header" style={{ textAlign: 'center', marginBottom: '3rem' }}>

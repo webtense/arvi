@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { emitToast } from '../../utils/toast';
+import { SeoHead } from '../../components/SEO/SeoHead';
 
 export const Contact = () => {
     const navigate = useNavigate();
@@ -55,10 +56,15 @@ export const Contact = () => {
 
     return (
         <section className="full-section">
+            <SeoHead
+                title="Contacte i pressupostos | ARVI Catalunya"
+                description="Demana pressupost de manteniment integral, reformes o incidencies a qualsevol punt de Catalunya. Resposta rapida per email o telefon."
+                path="/contacto"
+            />
             <div className="section-inner">
                 <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                     <Mail size={48} className="section-icon" />
-                    <h2 className="section-title">{t('landing.nav.contact')}</h2>
+                    <h1 className="section-title">{t('landing.nav.contact')}</h1>
                     <p className="section-subtitle">{t('contact.form.subtitle')}</p>
                 </div>
 

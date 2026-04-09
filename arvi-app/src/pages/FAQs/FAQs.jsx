@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronDown, HelpCircle, Hammer, Palette, Wrench, FileText, ChevronUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Card } from '../../components/Card/Card';
+import { SeoHead } from '../../components/SEO/SeoHead';
 import './FAQs.css';
 
 export const FAQs = () => {
@@ -25,10 +26,15 @@ export const FAQs = () => {
 
     return (
         <div className="faqs-page">
+            <SeoHead
+                title="Preguntes frequents de manteniment i reformes | ARVI"
+                description="Resol dubtes sobre manteniment integral, reformes, processos i pressupostos per comunitats i empreses a Catalunya."
+                path="/faqs"
+            />
             <section className="full-section">
                 <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                     <HelpCircle size={48} className="section-icon" />
-                    <h2 className="section-title">{t('faqs.title')}</h2>
+                    <h1 className="section-title">{t('faqs.title')}</h1>
                     <p className="section-subtitle">{t('faqs.subtitle')}</p>
                 </div>
 

@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Search, Clock, Tag, User, BookOpen, Building2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useBlog } from '../../context/BlogContext';
+import { SeoHead } from '../../components/SEO/SeoHead';
 import './Blog.css';
 
 export const BlogList = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const { posts } = useBlog();
     const [search, setSearch] = useState('');
 
@@ -17,10 +20,15 @@ export const BlogList = () => {
 
     return (
         <div className="public-blog-page">
+            <SeoHead
+                title="Blog de manteniment i reformes | ARVI"
+                description="Consells professionals de manteniment, normativa i eficiència per comunitats i pimes de Catalunya."
+                path="/blog"
+            />
             <section className="full-section">
                 <div className="section-inner">
                     <BookOpen size={48} className="section-icon" />
-                    <h2 className="section-title">{t('blog.title')}</h2>
+                    <h1 className="section-title">{t('blog.title')}</h1>
                     <p className="section-subtitle">{t('blog.subtitle')}</p>
 
                     <div className="blog-controls" style={{ marginBottom: '3rem' }}>

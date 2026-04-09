@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Sun, Moon, Wrench, ShieldCheck, Hammer, Building2, Store, Award, BookOpen, Mail, LogIn, UserCircle, ChevronDown, HelpCircle } from 'lucide-react';
+import { SeoHead } from '../../components/SEO/SeoHead';
 import './Landing.css';
 
 // Scroll suave a sección interna
@@ -14,14 +15,45 @@ export const Landing = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
 
+    const localBusinessJsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'LocalBusiness',
+        name: 'ARVI Manteniments Integrals',
+        url: 'https://arvimanteniment.com/',
+        telephone: '+34 669 47 55 83',
+        email: 'info@arvimanteniment.com',
+        address: {
+            '@type': 'PostalAddress',
+            streetAddress: 'C/ Sentmenat, 5',
+            addressLocality: 'Sabadell',
+            postalCode: '08203',
+            addressRegion: 'Barcelona',
+            addressCountry: 'ES'
+        },
+        areaServed: [
+            'Catalunya',
+            'Barcelona',
+            'Girona',
+            'Lleida',
+            'Tarragona'
+        ],
+        sameAs: ['https://arvimanteniment.com/']
+    };
+
     return (
         <div className="landing-page-content">
+            <SeoHead
+                title="Manteniment integral i reformes a Catalunya | ARVI"
+                description="Serveis professionals de manteniment integral, reformes i incidencies per comunitats i pimes a tota Catalunya. Atencio rapida i pressupost sense compromís."
+                path="/"
+                jsonLd={localBusinessJsonLd}
+            />
             <main className="landing-main">
 
                 {/* ======= HERO ======= */}
                 <section className="hero">
                     <div className="hero-content">
-                        <h2 className="hero-title">{t('landing.title')}</h2>
+                        <h1 className="hero-title">{t('landing.title')}</h1>
                         <p className="hero-subtitle">{t('landing.subtitle')}</p>
                         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '2rem', flexWrap: 'wrap' }}>
                             <button className="nav-btn primary hero-btn" onClick={() => scrollToSection('soluciones')}>
@@ -30,6 +62,19 @@ export const Landing = () => {
                             <button className="nav-btn secondary hero-btn" onClick={() => navigate('/contacto')}>
                                 {t('landing.hero.requestBudget')}
                             </button>
+                        </div>
+                    </div>
+                </section>
+
+                <section className="full-section coverage-section">
+                    <div className="section-inner">
+                        <h2 className="section-title">Cobertura a tota Catalunya</h2>
+                        <p className="section-subtitle">Treballam a Barcelona, Girona, Lleida i Tarragona amb equips propis i resposta rapida.</p>
+                        <div className="coverage-grid">
+                            <button className="coverage-card" onClick={() => navigate('/cobertura-catalunya')}>Barcelona i area metropolitana</button>
+                            <button className="coverage-card" onClick={() => navigate('/cobertura-catalunya')}>Girona i Costa Brava</button>
+                            <button className="coverage-card" onClick={() => navigate('/cobertura-catalunya')}>Lleida i Ponent</button>
+                            <button className="coverage-card" onClick={() => navigate('/cobertura-catalunya')}>Tarragona i Camp de Tarragona</button>
                         </div>
                     </div>
                 </section>

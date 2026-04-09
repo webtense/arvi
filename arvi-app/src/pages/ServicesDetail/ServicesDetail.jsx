@@ -8,6 +8,7 @@ import {
     ChefHat, Bath, Store, Palette, Sofa,
     Building2, TreePine, Wine, Sun, Layers, LayoutPanelLeft
 } from 'lucide-react';
+import { SeoHead } from '../../components/SEO/SeoHead';
 import './ServicesDetail.css';
 
 const IconMap = {
@@ -42,6 +43,12 @@ export const ServicesDetail = () => {
     if (!data) {
         return (
             <div className="service-detail-page">
+                <SeoHead
+                    title="Servei no trobat | ARVI"
+                    description="La pagina de servei solicitada no existeix."
+                    path={`/servicios/${serviceId}`}
+                    robots="noindex,follow"
+                />
                 <section className="full-section">
                     <div className="section-inner" style={{ textAlign: 'center' }}>
                         <div style={{ display: 'inline-flex', padding: '1rem', background: 'rgba(157, 206, 21, 0.1)', borderRadius: '20px', marginBottom: '1.5rem' }}>
@@ -60,6 +67,11 @@ export const ServicesDetail = () => {
 
     return (
         <section className="full-section">
+            <SeoHead
+                title={`${data.title} a Catalunya | ARVI`}
+                description={data.description}
+                path={`/servicios/${serviceId}`}
+            />
             <div className="section-inner">
                 <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                     <div style={{ display: 'inline-flex', padding: '1rem', background: 'rgba(157, 206, 21, 0.1)', borderRadius: '20px', marginBottom: '1.5rem' }}>

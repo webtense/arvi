@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+Disallow: /app/
+Disallow: /portal-cliente/
+Disallow: /api/
+
+Sitemap: https://arvimanteniment.com/sitemap.xml

@@ -29,4 +29,12 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-module.exports = { helmetConfig, apiLimiter, authLimiter };
+const contactLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 5,
+  message: { error: 'Demasiadas solicitudes de contacto, intenta de nuevo en unos minutos' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+module.exports = { helmetConfig, apiLimiter, authLimiter, contactLimiter };

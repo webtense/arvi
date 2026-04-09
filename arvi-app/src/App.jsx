@@ -42,6 +42,7 @@ import { BlogList } from './pages/PublicBlog/BlogList';
 import { BlogPost } from './pages/PublicBlog/BlogPost';
 import { PublicLayout } from './components/Layout/PublicLayout';
 import { GlobalToast } from './components/Feedback/GlobalToast';
+import { CoverageCatalunya } from './pages/Coverage/CoverageCatalunya';
 
 function AppContent() {
   useAutoTheme();
@@ -54,6 +55,7 @@ function AppContent() {
         <Route path="/login" element={<Login />} />
         <Route path="/servicios/:serviceId" element={<PublicLayout><ServicesDetail /></PublicLayout>} />
         <Route path="/contacto" element={<PublicLayout><Contact /></PublicLayout>} />
+        <Route path="/cobertura-catalunya" element={<PublicLayout><CoverageCatalunya /></PublicLayout>} />
         <Route path="/faqs" element={<PublicLayout><FAQs /></PublicLayout>} />
         <Route path="/politica-cookies" element={<PublicLayout><PoliticaCookies /></PublicLayout>} />
         <Route path="/blog" element={<PublicLayout><BlogList /></PublicLayout>} />

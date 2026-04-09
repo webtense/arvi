@@ -1,4 +1,4 @@
-const messages = require('./errors');
+const messages = require('../lib/errors');
 
 const errorHandler = (err, req, res, next) => {
   // Log del error
