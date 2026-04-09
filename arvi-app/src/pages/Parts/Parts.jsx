@@ -6,6 +6,7 @@ import { useAccounting } from '../../context/AccountingContext';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { emitToast } from '../../utils/toast';
+import api from '../../services/api';
 import './Parts.css';
 
 export const Parts = () => {
@@ -128,6 +129,30 @@ export const Parts = () => {
 
         addPart(newPart);
         resetForm();
+    };
+
+    const handleCompletePart = async (part) => {
+        const clientEmail = window.prompt('Email del cliente para enviar el PDF firmado:', '');
+        if (!clientEmail) {
+            emitToast({ type: 'error', message: 'El email del cliente es obligatorio para cerrar el parte.' });
+            return;
+        }
+
+        const workDone = window.prompt('Que se ha realizado exactamente en este parte?', part.work || '');
+        if (!workDone) return;
+
+        const signatureImage = canvasRef.current?.toDataURL?.('image/png');
+        if (!signatureImage) {
+            emitToast({ type: 'error', message: 'Debes capturar la firma del cliente antes de cerrar.' });
+            return;
+        }
+
+        try {
+            await api.completePart(part.id, { clientEmail, workDone, signatureImage });
+            emitToast({ type: 'success', message: 'Parte firmado y enviado por correo.' });
+        } catch (error) {
+            emitToast({ type: 'error', message: error.message || 'No se pudo cerrar y enviar el parte.' });
+        }
     };
 
     return (
@@ -327,12 +352,17 @@ export const Parts = () => {
                                             {part.status === 'invoiced' ? (
                                                 <span className="status-badge definitive">{t('parts.invoiced')}</span>
                                             ) : (
-                                                <Button size="small" variant="secondary" onClick={() => {
-                                                    convertToInvoice(part, 'part');
-                                                    navigate('/app/facturas');
-                                                }}>
-                                                    {t('parts.invoice')}
-                                                </Button>
+                                                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                                                    <Button size="small" variant="secondary" onClick={() => handleCompletePart(part)}>
+                                                        Cerrar y enviar
+                                                    </Button>
+                                                    <Button size="small" variant="secondary" onClick={() => {
+                                                        convertToInvoice(part, 'part');
+                                                        navigate('/app/facturas');
+                                                    }}>
+                                                        {t('parts.invoice')}
+                                                    </Button>
+                                                </div>
                                             )}
                                         </div>
                                     </div>

@@ -5,10 +5,11 @@ import { Camera, Upload, ScanLine, CheckCircle, Clock, TrendingUp, DollarSign, T
 import { createWorker } from 'tesseract.js';
 import { useTickets } from '../../context/TicketsContext';
 import { emitToast } from '../../utils/toast';
+import api from '../../services/api';
 import './Tickets.css';
 
 export const Tickets = () => {
-    const { tickets, projects, addTicket, closeMonth } = useTickets();
+    const { tickets, projects, addTicket, updateTicket, closeMonth } = useTickets();
     const [isScanning, setIsScanning] = useState(false);
     const [scanProgress, setScanProgress] = useState(0);
     const [scannedTickets, setScannedTickets] = useState([]);
@@ -23,7 +24,8 @@ export const Tickets = () => {
                 amount: t.amount + ' €',
                 category: t.category,
                 status: t.status,
-                imageUrl: t.imageUrl
+                imageUrl: t.imageUrl,
+                projectId: t.projectId || ''
             })));
         }
     }, [tickets]);
@@ -60,10 +62,11 @@ export const Tickets = () => {
             const { data: { text } } = await worker.recognize(file);
             await worker.terminate();
 
-            const merchant = text.split('\n')[0] || 'Nuevo Ticket';
-            const category = detectCategory(text);
-            const amountStr = extractAmount(text);
-            const amount = parseFloat(amountStr.replace(' €', '').replace(',', '.'));
+            const hints = await api.getOcrHints(text).catch(() => null);
+            const merchant = hints?.vendor || text.split('\n')[0] || 'Nuevo Ticket';
+            const category = hints?.category || detectCategory(text);
+            const amount = Number(hints?.amount || extractAmount(text).replace(' €', '').replace(',', '.'));
+            const amountStr = `${Number(amount || 0).toFixed(2)} €`;
             const imageData = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = () => resolve(reader.result);
@@ -237,6 +240,17 @@ export const Tickets = () => {
                                 </div>
                                 <div className="ticket-meta">
                                     <div className="ticket-amount">{ticket.amount}</div>
+                                    <select
+                                        className="form-control"
+                                        style={{ minWidth: '180px', marginTop: '0.5rem' }}
+                                        value={ticket.projectId || ''}
+                                        onChange={(e) => updateTicket(ticket.id, { projectId: e.target.value ? parseInt(e.target.value, 10) : null })}
+                                    >
+                                        <option value="">Asignar proyecto...</option>
+                                        {projects.map((p) => (
+                                            <option key={p.id} value={p.id}>{p.name}</option>
+                                        ))}
+                                    </select>
                                     {ticket.imageUrl && (
                                         <a href={ticket.imageUrl} target="_blank" rel="noreferrer" className="text-muted text-sm">Descargar</a>
                                     )}

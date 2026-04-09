@@ -7,6 +7,7 @@ dotenv.config();
 
 const app = express();
 app.disable('x-powered-by');
+app.set('trust proxy', 1);
 
 // Security middleware
 const { helmetConfig, apiLimiter, authLimiter, contactLimiter } = require('./middleware/security');
@@ -53,6 +54,7 @@ const projectsRoutes = require('./routes/projects');
 const subcontractorsRoutes = require('./routes/subcontractors');
 const clientsRoutes = require('./routes/clients');
 const contactRoutes = require('./routes/contact');
+const documentsRoutes = require('./routes/documents');
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -74,6 +76,7 @@ app.use('/api/projects', projectsRoutes);
 app.use('/api/subcontractors', subcontractorsRoutes);
 app.use('/api/clients', clientsRoutes);
 app.use('/api/contact', contactLimiter, contactRoutes);
+app.use('/api/documents', documentsRoutes);
 
 // Static files (uploads)
 app.use('/api/storage', express.static(path.join(__dirname, 'storage')));

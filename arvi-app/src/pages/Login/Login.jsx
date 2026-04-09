@@ -2,12 +2,18 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/Button/Button';
-import { Lock, User, AlertCircle } from 'lucide-react';
+import { Lock, User, AlertCircle, Eye, EyeOff, KeyRound } from 'lucide-react';
+import api from '../../services/api';
 
 export const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showRecovery, setShowRecovery] = useState(false);
+    const [recoveryIdentifier, setRecoveryIdentifier] = useState('');
+    const [recoveryMessage, setRecoveryMessage] = useState('');
+    const [recovering, setRecovering] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
@@ -31,6 +37,26 @@ export const Login = () => {
             }
         } else {
             setError(result.error);
+        }
+    };
+
+    const handlePasswordRecovery = async (e) => {
+        e.preventDefault();
+        setRecoveryMessage('');
+
+        if (!recoveryIdentifier.trim()) {
+            setRecoveryMessage('Indica tu usuario o email para recuperar la contrasena.');
+            return;
+        }
+
+        try {
+            setRecovering(true);
+            const response = await api.forgotPassword(recoveryIdentifier.trim());
+            setRecoveryMessage(response.message || 'Solicitud de recuperacion enviada.');
+        } catch (recoveryError) {
+            setRecoveryMessage(recoveryError.message || 'No se pudo enviar la solicitud.');
+        } finally {
+            setRecovering(false);
         }
     };
 
@@ -71,18 +97,57 @@ export const Login = () => {
                         <div style={{ position: 'relative' }}>
                             <Lock size={18} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '12px' }} />
                             <input
-                                type="password"
+                                type={showPassword ? 'text' : 'password'}
                                 style={{ width: '100%', padding: '10px 10px 10px 40px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-dark)', color: 'var(--text-main)', fontSize: '1rem' }}
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(prev => !prev)}
+                                style={{ position: 'absolute', right: '10px', top: '8px', border: 'none', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer' }}
+                                aria-label={showPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'}
+                            >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
                         </div>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setShowRecovery(prev => !prev);
+                                setRecoveryMessage('');
+                            }}
+                            style={{ marginTop: '0.75rem', border: 'none', background: 'transparent', color: 'var(--brand-green)', cursor: 'pointer', padding: 0, fontSize: '0.9rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                        >
+                            <KeyRound size={16} /> Olvide mi contrasena
+                        </button>
                     </div>
 
                     <Button type="submit" className="primary" style={{ width: '100%' }}>
                         Iniciar Sesión
                     </Button>
+
+                    {showRecovery && (
+                        <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+                            <form onSubmit={handlePasswordRecovery} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                <label style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Recuperar contrasena (usuario o email)</label>
+                                <input
+                                    type="text"
+                                    value={recoveryIdentifier}
+                                    onChange={(e) => setRecoveryIdentifier(e.target.value)}
+                                    placeholder="admin o admin@arvi.com"
+                                    style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-dark)', color: 'var(--text-main)', fontSize: '0.95rem' }}
+                                />
+                                <Button type="submit" className="secondary" disabled={recovering} style={{ width: '100%' }}>
+                                    {recovering ? 'Enviando...' : 'Enviar solicitud'}
+                                </Button>
+                                {recoveryMessage && (
+                                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>{recoveryMessage}</p>
+                                )}
+                            </form>
+                        </div>
+                    )}
                 </form>
 
                 <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginTop: '2rem', fontSize: '0.85rem' }}>

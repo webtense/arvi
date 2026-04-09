@@ -2,6 +2,8 @@ const { Router } = require('express');
 const { prisma } = require('../lib/prisma');
 const authMiddleware = require('../middleware/auth');
 const messages = require('../lib/errors');
+const { sanitizeString, validateEmail } = require('../lib/validation');
+const { sendMail } = require('../lib/mailer');
 
 const router = Router();
 const authorizeRoles = authMiddleware.authorizeRoles;
@@ -89,7 +91,36 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const { items, ...budgetData } = req.body;
+    const { items, clientId, ...budgetData } = req.body;
+
+    let resolvedClient = null;
+    if (clientId) {
+      resolvedClient = await prisma.client.findUnique({ where: { id: parseInt(clientId, 10) } });
+    }
+
+    if (!resolvedClient && budgetData.client) {
+      const normalizedEmail = budgetData.clientEmail ? budgetData.clientEmail.toLowerCase() : null;
+      resolvedClient = await prisma.client.findFirst({
+        where: {
+          OR: [
+            { name: { equals: budgetData.client, mode: 'insensitive' } },
+            ...(normalizedEmail ? [{ email: { equals: normalizedEmail, mode: 'insensitive' } }] : []),
+          ],
+        },
+      });
+    }
+
+    if (!resolvedClient && budgetData.client) {
+      resolvedClient = await prisma.client.create({
+        data: {
+          name: sanitizeString(budgetData.client),
+          cif: budgetData.clientCif || null,
+          email: budgetData.clientEmail ? budgetData.clientEmail.toLowerCase() : null,
+          phone: budgetData.clientPhone || null,
+          address: budgetData.clientAddress || null,
+        },
+      });
+    }
     
     const subtotal = items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
     const taxTotal = items.reduce((sum, item) => sum + (item.unitPrice * item.quantity * item.tax / 100), 0);
@@ -103,6 +134,11 @@ router.post('/', async (req, res) => {
     const budget = await prisma.budget.create({
       data: {
         ...budgetData,
+        client: resolvedClient?.name || budgetData.client,
+        clientCif: resolvedClient?.cif || budgetData.clientCif || null,
+        clientEmail: resolvedClient?.email || budgetData.clientEmail || null,
+        clientPhone: resolvedClient?.phone || budgetData.clientPhone || null,
+        clientAddress: resolvedClient?.address || budgetData.clientAddress || null,
         budgetNumber: budgetData.budgetNumber || `P${year}${(count + 1).toString().padStart(4, '0')}`,
         date: new Date(budgetData.date),
         subtotal,
@@ -186,9 +222,74 @@ router.post('/:id/send', async (req, res) => {
         sentAt: new Date()
       }
     });
+
+    const recipients = [budget.clientEmail, process.env.ADMIN_EMAIL || 'info@arvimanteniment.com'].filter(Boolean);
+
+    if (budget.clientEmail && validateEmail(budget.clientEmail)) {
+      return res.status(400).json({ error: 'El cliente no tiene email valido para envio' });
+    }
+
+    if (recipients.length > 0) {
+      await sendMail({
+        to: recipients.join(','),
+        subject: `Presupuesto ${budget.budgetNumber}`,
+        text: `Hola ${budget.client},
+
+Adjuntamos el presupuesto ${budget.budgetNumber}.
+Total estimado: ${Number(budget.total || 0).toFixed(2)} EUR.
+
+Gracias,
+ARVI`,
+      });
+    }
+
     res.json(budget);
   } catch (error) {
     res.status(500).json({ error: 'Error al enviar presupuesto' });
+  }
+});
+
+router.post('/:id/to-invoice', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const budget = await prisma.budget.findUnique({ where: { id }, include: { items: true } });
+    if (!budget) return res.status(404).json({ error: 'Presupuesto no encontrado' });
+
+    const year = new Date().getFullYear();
+    const count = await prisma.invoice.count({ where: { invoiceNumber: { startsWith: `${year}/` } } });
+
+    const invoice = await prisma.invoice.create({
+      data: {
+        invoiceNumber: `${year}/${String(count + 1).padStart(4, '0')}`,
+        date: new Date(),
+        clientName: budget.client,
+        clientCif: budget.clientCif,
+        clientAddress: budget.clientAddress,
+        description: `Generada desde presupuesto ${budget.budgetNumber}`,
+        subtotal: budget.subtotal,
+        taxRate: budget.taxRate,
+        taxTotal: budget.taxTotal,
+        total: budget.total,
+        status: 'draft',
+        type: 'draft',
+        items: {
+          create: budget.items.map((item) => ({
+            description: item.description,
+            quantity: item.quantity,
+            unit: item.unit,
+            unitPrice: item.unitPrice,
+            tax: item.tax,
+            total: item.total,
+          })),
+        },
+      },
+      include: { items: true },
+    });
+
+    await prisma.budget.update({ where: { id }, data: { status: 'invoiced' } });
+    res.json(invoice);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al convertir presupuesto en factura' });
   }
 });
 

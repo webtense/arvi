@@ -30,6 +30,8 @@ export const Blog = () => {
     const [deleteConfirm, setDeleteConfirm] = useState(null);
     const [activeTab, setActiveTab] = useState('list'); // 'list' | 'preview'
     const [previewPost, setPreviewPost] = useState(null);
+    const [aiTopic, setAiTopic] = useState('');
+    const [aiTone, setAiTone] = useState('profesional');
 
     // Filtros aplicados
     const filtered = posts.filter(p => {
@@ -88,6 +90,22 @@ export const Blog = () => {
             addPost(newPost);
         }
         setModalOpen(false);
+    };
+
+    const generateWithAI = () => {
+        const topic = aiTopic.trim() || formData.title.trim() || 'mantenimiento preventivo en comunidades';
+        const title = `Guia practica: ${topic}`;
+        const excerpt = `Claves para ${topic} con enfoque ${aiTone}, ahorro de costes y mejor experiencia para comunidades y pymes.`;
+        const content = `## Introduccion\n\nEn este articulo explicamos como ${topic} de forma ${aiTone} y orientada a resultados.\n\n## Problemas mas comunes\n\n- Falta de mantenimiento planificado\n- Costes reactivos por averias\n- Tiempos de respuesta altos\n\n## Recomendaciones practicas\n\n1. Define un plan trimestral de revisiones.\n2. Prioriza activos criticos y riesgos de seguridad.\n3. Registra incidencias y horas para medir productividad.\n4. Revisa presupuestos y contratos por proveedor.\n\n## Checklist de accion\n\n- Estado actual de equipos\n- Incidencias abiertas\n- Coste mensual de mantenimiento\n- Proximas acciones por prioridad\n\n## Conclusion\n\nAplicando este enfoque, ARVI puede mejorar servicio, reducir incidencias y aumentar rentabilidad en proyectos de mantenimiento integral.`;
+
+        setFormData((prev) => ({
+            ...prev,
+            title,
+            excerpt,
+            content,
+            tags: 'mantenimiento, comunidades, eficiencia, ARVI',
+            category: prev.category || 'Consejos',
+        }));
     };
 
     // Cambiar estado publicado/borrador
@@ -387,6 +405,26 @@ export const Blog = () => {
                                         <option value="draft">Borrador</option>
                                         <option value="published">Publicado</option>
                                     </select>
+                                </div>
+                            </div>
+                            <div className="form-row">
+                                <div className="form-group full" style={{ border: '1px solid var(--border-color)', borderRadius: '12px', padding: '12px', background: 'rgba(56,161,105,0.05)' }}>
+                                    <label>Asistente IA para borradores</label>
+                                    <div style={{ display: 'grid', gap: '8px', gridTemplateColumns: '2fr 1fr auto' }}>
+                                        <input
+                                            type="text"
+                                            placeholder="Tema del articulo (ej: mantenimiento ascensores en comunidades)"
+                                            value={aiTopic}
+                                            onChange={(e) => setAiTopic(e.target.value)}
+                                            className="form-input"
+                                        />
+                                        <select value={aiTone} onChange={(e) => setAiTone(e.target.value)} className="form-input">
+                                            <option value="profesional">Profesional</option>
+                                            <option value="cercano">Cercano</option>
+                                            <option value="tecnico">Tecnico</option>
+                                        </select>
+                                        <button className="btn-save-draft" type="button" onClick={generateWithAI}>Generar borrador IA</button>
+                                    </div>
                                 </div>
                             </div>
                             <div className="form-row">

@@ -23,6 +23,8 @@ export const Subcontractors = () => {
     const [form, setForm] = useState(emptyForm);
     const [editingId, setEditingId] = useState(null);
     const [query, setQuery] = useState('');
+    const [projects, setProjects] = useState([]);
+    const [assignment, setAssignment] = useState({ subcontractorId: '', projectId: '', cost: '', invoiceAmount: '', notes: '' });
 
     const load = async () => {
         try {
@@ -44,6 +46,7 @@ export const Subcontractors = () => {
 
     useEffect(() => {
         load();
+        api.getProjects().then(setProjects).catch(() => setProjects([]));
     }, []);
 
     useEffect(() => {
@@ -119,6 +122,27 @@ export const Subcontractors = () => {
         setItems((prev) => prev.filter((s) => s.id !== id));
     };
 
+    const assignToProject = async () => {
+        if (!assignment.subcontractorId || !assignment.projectId) {
+            emitToast({ type: 'error', message: 'Selecciona subcontrata y proyecto' });
+            return;
+        }
+
+        try {
+            await api.addSubcontractorAssignment(assignment.subcontractorId, {
+                projectId: assignment.projectId,
+                cost: Number(assignment.cost || 0),
+                invoiceAmount: Number(assignment.invoiceAmount || 0),
+                notes: assignment.notes,
+            });
+            emitToast({ type: 'success', message: 'Subcontrata asignada al proyecto' });
+            setAssignment({ subcontractorId: '', projectId: '', cost: '', invoiceAmount: '', notes: '' });
+            await load();
+        } catch (error) {
+            emitToast({ type: 'error', message: error.message || 'No se pudo asignar la subcontrata' });
+        }
+    };
+
     return (
         <div className="dashboard">
             <header className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
@@ -157,6 +181,21 @@ export const Subcontractors = () => {
             </Card>
 
             <Card title="Directorio de Subcontratas" style={{ marginTop: '16px' }}>
+                <div style={{ marginBottom: '1rem', display: 'grid', gap: '8px', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
+                    <select className="form-control" value={assignment.subcontractorId} onChange={(e) => setAssignment((p) => ({ ...p, subcontractorId: e.target.value }))}>
+                        <option value="">Asignar subcontrata...</option>
+                        {items.map((it) => <option key={it.id} value={it.id}>{it.name}</option>)}
+                    </select>
+                    <select className="form-control" value={assignment.projectId} onChange={(e) => setAssignment((p) => ({ ...p, projectId: e.target.value }))}>
+                        <option value="">Proyecto...</option>
+                        {projects.map((prj) => <option key={prj.id} value={prj.id}>{prj.name}</option>)}
+                    </select>
+                    <input className="form-control" type="number" placeholder="Coste" value={assignment.cost} onChange={(e) => setAssignment((p) => ({ ...p, cost: e.target.value }))} />
+                    <input className="form-control" type="number" placeholder="Facturado" value={assignment.invoiceAmount} onChange={(e) => setAssignment((p) => ({ ...p, invoiceAmount: e.target.value }))} />
+                    <input className="form-control" placeholder="Notas" value={assignment.notes} onChange={(e) => setAssignment((p) => ({ ...p, notes: e.target.value }))} />
+                    <Button variant="secondary" onClick={assignToProject}>Asignar</Button>
+                </div>
+
                 {loading ? (
                     <p className="text-muted">Cargando...</p>
                 ) : filtered.length === 0 ? (
@@ -171,6 +210,7 @@ export const Subcontractors = () => {
                                         <h4>{item.name}</h4>
                                         <span className="project-status">{item.cif} · {item.contactPerson || 'Sin contacto'} · {item.contactPhone || '-'}</span>
                                         <div className="text-muted" style={{ fontSize: '0.85rem' }}>{item.paymentMethod || 'Forma de pago no definida'} · {item.accountNumber || 'Cuenta no definida'}</div>
+                                        <div className="text-muted" style={{ fontSize: '0.85rem' }}>Proyectos: {item.projectCount || 0} · Facturado: {Number(item.totalInvoiced || 0).toFixed(2)} EUR</div>
                                     </div>
                                 </div>
                                 <div className="project-meta" style={{ display: 'flex', gap: '8px' }}>

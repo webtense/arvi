@@ -72,9 +72,9 @@ export const AssetsProvider = ({ children }) => {
         }
     };
 
-    const deleteAsset = async (id) => {
+    const deleteAsset = async (id, reason = '') => {
         try {
-            await api.deleteAsset(id);
+            await api.deleteAsset(id, reason);
             setAssets(prev => prev.filter(a => a.id !== id));
             emitToast({ type: 'success', message: 'Activo eliminado.' });
         } catch (error) {

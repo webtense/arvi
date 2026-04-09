@@ -1,9 +1,18 @@
 const { Router } = require('express');
 const { prisma } = require('../lib/prisma');
 const authMiddleware = require('../middleware/auth');
+const fs = require('fs');
+const path = require('path');
+const { sanitizeString } = require('../lib/validation');
 
 const router = Router();
 const authorizeRoles = authMiddleware.authorizeRoles;
+
+const assignmentsFile = path.join(__dirname, '..', 'storage', 'subcontractor-assignments.json');
+if (!fs.existsSync(path.dirname(assignmentsFile))) fs.mkdirSync(path.dirname(assignmentsFile), { recursive: true });
+if (!fs.existsSync(assignmentsFile)) fs.writeFileSync(assignmentsFile, JSON.stringify([], null, 2));
+const readAssignments = () => JSON.parse(fs.readFileSync(assignmentsFile, 'utf8'));
+const writeAssignments = (rows) => fs.writeFileSync(assignmentsFile, JSON.stringify(rows, null, 2));
 
 router.use(authMiddleware, authorizeRoles('admin'));
 
@@ -27,8 +36,16 @@ router.get('/', async (req, res, next) => {
       prisma.subcontractor.count({ where })
     ]);
 
+    const assignments = readAssignments();
+    const enriched = subcontractors.map((sub) => {
+      const related = assignments.filter((a) => a.subcontractorId === sub.id);
+      const totalInvoiced = related.reduce((sum, item) => sum + Number(item.invoiceAmount || 0), 0);
+      const projectCount = new Set(related.map((r) => r.projectId).filter(Boolean)).size;
+      return { ...sub, totalInvoiced, projectCount };
+    });
+
     res.json({
-      data: subcontractors,
+      data: enriched,
       pagination: { page: pageNum, limit: limitNum, total, totalPages: Math.ceil(total / limitNum) }
     });
   } catch (error) {
@@ -45,9 +62,33 @@ router.get('/:id', async (req, res) => {
     if (!subcontractor) {
       return res.status(404).json({ error: 'Subcontrata no encontrada' });
     }
-    res.json(subcontractor);
+    const assignments = readAssignments().filter((a) => a.subcontractorId === parseInt(id));
+    res.json({ ...subcontractor, assignments });
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener subcontrata' });
+  }
+});
+
+router.post('/:id/assignments', async (req, res) => {
+  try {
+    const subcontractorId = parseInt(req.params.id, 10);
+    const { projectId, cost = 0, invoiceAmount = 0, notes = '' } = req.body;
+
+    const rows = readAssignments();
+    const entry = {
+      id: Date.now().toString(),
+      subcontractorId,
+      projectId: projectId ? parseInt(projectId, 10) : null,
+      cost: Number(cost),
+      invoiceAmount: Number(invoiceAmount),
+      notes: sanitizeString(notes),
+      createdAt: new Date().toISOString(),
+    };
+    rows.unshift(entry);
+    writeAssignments(rows);
+    res.status(201).json(entry);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al asignar subcontrata al proyecto' });
   }
 });
 

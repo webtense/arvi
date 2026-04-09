@@ -5,3 +5,5 @@ arvi-api/.env
 *.env.local
 dist/
 *.log
+Facturas*/
+Facturas */

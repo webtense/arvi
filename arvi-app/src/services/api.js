@@ -61,6 +61,12 @@ class ApiService {
     }
   }
 
+  normalizeListResponse(payload) {
+    if (Array.isArray(payload)) return payload;
+    if (payload && Array.isArray(payload.data)) return payload.data;
+    return [];
+  }
+
   // Auth
   async login(username, password) {
     const data = await this.request('/auth/login', {
@@ -77,13 +83,21 @@ class ApiService {
     this.removeToken();
   }
 
+  async forgotPassword(identifier) {
+    return this.request('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ identifier }),
+    });
+  }
+
   async getCurrentUser() {
     return this.request('/auth/me');
   }
 
   // Invoices
   async getInvoices() {
-    return this.request('/invoices');
+    const data = await this.request('/invoices');
+    return this.normalizeListResponse(data);
   }
 
   async createInvoice(invoice) {
@@ -128,7 +142,8 @@ class ApiService {
   // Clients
   async getClients(search) {
     const query = search ? `?search=${encodeURIComponent(search)}` : '';
-    return this.request(`/clients${query}`);
+    const data = await this.request(`/clients${query}`);
+    return this.normalizeListResponse(data);
   }
 
   async getClient(id) {
@@ -157,7 +172,8 @@ class ApiService {
 
   // Budgets
   async getBudgets() {
-    return this.request('/budgets');
+    const data = await this.request('/budgets');
+    return this.normalizeListResponse(data);
   }
 
   async createBudget(budget) {
@@ -200,7 +216,15 @@ class ApiService {
 
   // Parts
   async getParts() {
-    return this.request('/parts');
+    const data = await this.request('/parts');
+    return this.normalizeListResponse(data);
+  }
+
+  async completePart(id, payload) {
+    return this.request(`/parts/${id}/complete`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   }
 
   async createPart(part) {
@@ -225,7 +249,8 @@ class ApiService {
 
   // Assets
   async getAssets() {
-    return this.request('/assets');
+    const data = await this.request('/assets');
+    return this.normalizeListResponse(data);
   }
 
   async createAsset(asset) {
@@ -242,15 +267,17 @@ class ApiService {
     });
   }
 
-  async deleteAsset(id) {
+  async deleteAsset(id, reason = '') {
     return this.request(`/assets/${id}`, {
       method: 'DELETE',
+      body: JSON.stringify({ reason }),
     });
   }
 
   // Tickets
   async getTickets() {
-    return this.request('/tickets');
+    const data = await this.request('/tickets');
+    return this.normalizeListResponse(data);
   }
 
   async createTicket(ticket) {
@@ -281,7 +308,8 @@ class ApiService {
 
   // Projects
   async getProjects() {
-    return this.request('/projects');
+    const data = await this.request('/projects');
+    return this.normalizeListResponse(data);
   }
 
   async createProject(project) {
@@ -306,7 +334,85 @@ class ApiService {
 
   // Subcontractors
   async getSubcontractors() {
-    return this.request('/subcontractors');
+    const data = await this.request('/subcontractors');
+    return this.normalizeListResponse(data);
+  }
+
+  async assignTicketsToProject(ticketIds, projectId) {
+    return this.request('/tickets/assign-project', {
+      method: 'POST',
+      body: JSON.stringify({ ticketIds, projectId }),
+    });
+  }
+
+  async getOcrHints(text) {
+    return this.request('/tickets/ocr-hints', {
+      method: 'POST',
+      body: JSON.stringify({ text }),
+    });
+  }
+
+  async getDocuments(filters = {}) {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && String(v).trim() !== '') params.set(k, v);
+    });
+    const query = params.toString() ? `?${params.toString()}` : '';
+    const data = await this.request(`/documents${query}`);
+    return this.normalizeListResponse(data);
+  }
+
+  async uploadDocument(formData) {
+    const token = this.getToken();
+    const response = await fetch(`${this.baseUrl}/documents/upload`, {
+      method: 'POST',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: formData,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Error de servidor' }));
+      throw new Error(error.error || 'Error subiendo documento');
+    }
+    return response.json();
+  }
+
+  async deleteDocument(id) {
+    return this.request(`/documents/${id}`, { method: 'DELETE' });
+  }
+
+  getDocumentDownloadUrl(id) {
+    return `${this.baseUrl}/documents/download/${id}`;
+  }
+
+  async importClientsFromFacturas() {
+    return this.request('/clients/import-facturas', { method: 'POST' });
+  }
+
+  async getClientLedger(id) {
+    return this.request(`/clients/${id}/ledger`);
+  }
+
+  async getClientDuplicateReport() {
+    return this.request('/clients/quality/duplicates');
+  }
+
+  async reconcileInvoicesByClient() {
+    return this.request('/clients/quality/reconcile', { method: 'POST' });
+  }
+
+  async budgetToInvoice(id) {
+    return this.request(`/budgets/${id}/to-invoice`, { method: 'POST' });
+  }
+
+  async getHistoricalImports(filters = {}) {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && String(v).trim() !== '') params.set(k, v);
+    });
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return this.request(`/invoices/historical-imports${query}`);
   }
 
   async createSubcontractor(payload) {
@@ -326,6 +432,13 @@ class ApiService {
   async deleteSubcontractor(id) {
     return this.request(`/subcontractors/${id}`, {
       method: 'DELETE',
+    });
+  }
+
+  async addSubcontractorAssignment(id, payload) {
+    return this.request(`/subcontractors/${id}/assignments`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
     });
   }
 

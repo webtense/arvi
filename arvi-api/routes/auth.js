@@ -1,11 +1,34 @@
 const { Router } = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const path = require('path');
 const { prisma } = require('../lib/prisma');
 const authMiddleware = require('../middleware/auth');
 const messages = require('../lib/errors');
+const { sanitizeString, validateEmail } = require('../lib/validation');
 
 const router = Router();
+const resetRequestsFile = path.join(__dirname, '..', 'storage', 'password-reset-requests.json');
+
+const ensureResetRequestsFile = () => {
+  if (!fs.existsSync(path.dirname(resetRequestsFile))) {
+    fs.mkdirSync(path.dirname(resetRequestsFile), { recursive: true });
+  }
+
+  if (!fs.existsSync(resetRequestsFile)) {
+    fs.writeFileSync(resetRequestsFile, JSON.stringify([], null, 2));
+  }
+};
+
+const readResetRequests = () => {
+  ensureResetRequestsFile();
+  return JSON.parse(fs.readFileSync(resetRequestsFile, 'utf8'));
+};
+
+const writeResetRequests = (requests) => {
+  fs.writeFileSync(resetRequestsFile, JSON.stringify(requests, null, 2));
+};
 
 /**
  * @swagger
@@ -112,6 +135,50 @@ router.post('/register', async (req, res, next) => {
     });
 
     res.status(201).json({ message: 'Usuario creado correctamente', userId: user.id });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/forgot-password', async (req, res, next) => {
+  try {
+    const identifier = sanitizeString(req.body.identifier).toLowerCase();
+
+    if (!identifier) {
+      return res.status(400).json({ error: messages.FIELD_REQUIRED('usuario o email') });
+    }
+
+    if (identifier.includes('@')) {
+      const emailError = validateEmail(identifier);
+      if (emailError) {
+        return res.status(400).json({ error: emailError });
+      }
+    }
+
+    let user = null;
+    if (identifier.includes('@')) {
+      user = await prisma.user.findFirst({ where: { email: identifier } });
+    } else {
+      user = await prisma.user.findUnique({ where: { username: identifier } });
+    }
+
+    if (user) {
+      const requests = readResetRequests();
+      requests.unshift({
+        id: Date.now().toString(),
+        requestedAt: new Date().toISOString(),
+        userId: user.id,
+        username: user.username,
+        email: user.email,
+        status: 'pending'
+      });
+      writeResetRequests(requests);
+    }
+
+    return res.json({
+      success: true,
+      message: 'Si los datos son correctos, recibiras instrucciones de recuperacion pronto.'
+    });
   } catch (error) {
     next(error);
   }

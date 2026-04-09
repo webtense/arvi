@@ -117,6 +117,80 @@ router.get('/next-number', async (req, res) => {
   }
 });
 
+router.get('/historical-imports', async (req, res, next) => {
+  try {
+    const { year, clientId, search, minAmount, maxAmount, page = '1', limit = '50' } = req.query;
+    const pageNum = parseInt(page, 10) || 1;
+    const limitNum = Math.min(parseInt(limit, 10) || 50, 100);
+    const skip = (pageNum - 1) * limitNum;
+
+    const where = {
+      OR: [{ invoiceNumber: { startsWith: 'H' } }, { notes: { contains: 'IMPORT_HISTORICO' } }],
+    };
+
+    if (year) {
+      where.invoiceNumber = { startsWith: `H${year}/` };
+    }
+
+    if (clientId) where.clientId = parseInt(clientId, 10);
+    if (search) {
+      where.AND = [
+        {
+          OR: [
+            { clientName: { contains: search, mode: 'insensitive' } },
+            { invoiceNumber: { contains: search, mode: 'insensitive' } },
+            { description: { contains: search, mode: 'insensitive' } },
+          ],
+        },
+      ];
+    }
+
+    const min = minAmount !== undefined ? Number(minAmount) : null;
+    const max = maxAmount !== undefined ? Number(maxAmount) : null;
+    if (min !== null || max !== null) {
+      where.total = {
+        ...(min !== null && Number.isFinite(min) ? { gte: min } : {}),
+        ...(max !== null && Number.isFinite(max) ? { lte: max } : {}),
+      };
+    }
+
+    const [rows, total, grouped] = await Promise.all([
+      prisma.invoice.findMany({
+        where,
+        include: { items: true, client: true },
+        orderBy: { date: 'desc' },
+        skip,
+        take: limitNum,
+      }),
+      prisma.invoice.count({ where }),
+      prisma.invoice.groupBy({
+        by: ['invoiceNumber'],
+        where: { OR: [{ invoiceNumber: { startsWith: 'H' } }, { notes: { contains: 'IMPORT_HISTORICO' } }] },
+        _count: { invoiceNumber: true },
+      }),
+    ]);
+
+    const years = {};
+    grouped.forEach((entry) => {
+      const y = String(entry.invoiceNumber || '').match(/^H(\d{4})\//)?.[1];
+      if (y) years[y] = (years[y] || 0) + entry._count.invoiceNumber;
+    });
+
+    res.json({
+      data: rows,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+      },
+      years,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -148,7 +222,16 @@ router.post('/', async (req, res) => {
 
     const invoice = await prisma.invoice.create({
       data: {
-        ...invoiceData,
+        clientName: invoiceData.clientName || invoiceData.client || 'Cliente',
+        clientCif: invoiceData.clientCif || null,
+        clientAddress: invoiceData.clientAddress || null,
+        clientId: invoiceData.clientId ? parseInt(invoiceData.clientId, 10) : null,
+        description: invoiceData.description || null,
+        notes: invoiceData.notes || null,
+        paymentMethod: invoiceData.paymentMethod || null,
+        projectId: invoiceData.projectId ? parseInt(invoiceData.projectId, 10) : null,
+        status: invoiceData.status || 'draft',
+        type: invoiceData.type || 'draft',
         invoiceNumber: invoiceData.invoiceNumber || `${year}/${(count + 1).toString().padStart(4, '0')}`,
         date: new Date(invoiceData.date),
         dueDate: invoiceData.dueDate ? new Date(invoiceData.dueDate) : null,
@@ -191,7 +274,18 @@ router.put('/:id', async (req, res) => {
       const invoice = await prisma.invoice.update({
         where: { id: parseInt(id) },
         data: {
-          ...invoiceData,
+          clientName: invoiceData.clientName || invoiceData.client || undefined,
+          clientCif: invoiceData.clientCif,
+          clientAddress: invoiceData.clientAddress,
+          clientId: invoiceData.clientId ? parseInt(invoiceData.clientId, 10) : null,
+          description: invoiceData.description,
+          notes: invoiceData.notes,
+          paymentMethod: invoiceData.paymentMethod,
+          projectId: invoiceData.projectId ? parseInt(invoiceData.projectId, 10) : null,
+          status: invoiceData.status,
+          type: invoiceData.type,
+          date: invoiceData.date ? new Date(invoiceData.date) : undefined,
+          dueDate: invoiceData.dueDate ? new Date(invoiceData.dueDate) : null,
           subtotal,
           taxTotal,
           total,
@@ -212,7 +306,20 @@ router.put('/:id', async (req, res) => {
     } else {
       const invoice = await prisma.invoice.update({
         where: { id: parseInt(id) },
-        data: invoiceData
+        data: {
+          ...(invoiceData.clientName || invoiceData.client ? { clientName: invoiceData.clientName || invoiceData.client } : {}),
+          ...(invoiceData.clientCif !== undefined ? { clientCif: invoiceData.clientCif } : {}),
+          ...(invoiceData.clientAddress !== undefined ? { clientAddress: invoiceData.clientAddress } : {}),
+          ...(invoiceData.clientId !== undefined ? { clientId: invoiceData.clientId ? parseInt(invoiceData.clientId, 10) : null } : {}),
+          ...(invoiceData.description !== undefined ? { description: invoiceData.description } : {}),
+          ...(invoiceData.notes !== undefined ? { notes: invoiceData.notes } : {}),
+          ...(invoiceData.paymentMethod !== undefined ? { paymentMethod: invoiceData.paymentMethod } : {}),
+          ...(invoiceData.projectId !== undefined ? { projectId: invoiceData.projectId ? parseInt(invoiceData.projectId, 10) : null } : {}),
+          ...(invoiceData.status !== undefined ? { status: invoiceData.status } : {}),
+          ...(invoiceData.type !== undefined ? { type: invoiceData.type } : {}),
+          ...(invoiceData.date ? { date: new Date(invoiceData.date) } : {}),
+          ...(invoiceData.dueDate !== undefined ? { dueDate: invoiceData.dueDate ? new Date(invoiceData.dueDate) : null } : {}),
+        }
       });
       res.json(invoice);
     }

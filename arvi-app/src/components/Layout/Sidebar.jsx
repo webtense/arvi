@@ -17,6 +17,7 @@ export const Sidebar = () => {
         { path: '/app/facturas', icon: <FileText size={20} />, label: 'Facturas', enabled: true },
         { path: '/app/presupuestos', icon: <Calculator size={20} />, label: 'Presupuestos', enabled: true },
         { path: '/app/subcontratas', icon: <Users size={20} />, label: 'Subcontratas', enabled: true },
+        { path: '/app/clientes', icon: <Users size={20} />, label: 'Clientes', enabled: true },
         { path: '/app/documentos', icon: <FolderOpen size={20} />, label: 'Documentos', enabled: true },
         { path: '/app/usuarios', icon: <Users size={20} />, label: 'Usuarios', enabled: true },
         { path: '/app/blog', icon: <BookOpen size={20} />, label: 'Gestión de Blog', enabled: true },

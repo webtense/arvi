@@ -107,6 +107,50 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+router.post('/assign-project', async (req, res) => {
+  try {
+    const { ticketIds = [], projectId } = req.body;
+    if (!Array.isArray(ticketIds) || ticketIds.length === 0) {
+      return res.status(400).json({ error: 'Debes indicar tickets para asignar' });
+    }
+
+    await prisma.ticket.updateMany({
+      where: { id: { in: ticketIds.map((id) => parseInt(id, 10)).filter(Boolean) } },
+      data: { projectId: projectId ? parseInt(projectId, 10) : null },
+    });
+
+    res.json({ success: true, updated: ticketIds.length });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al asignar proyecto a tickets' });
+  }
+});
+
+router.post('/ocr-hints', async (req, res) => {
+  try {
+    const rawText = String(req.body.text || '').replace(/\s+/g, ' ').trim();
+    if (!rawText) return res.status(400).json({ error: 'Texto OCR vacio' });
+
+    const amountMatch = rawText.match(/(\d+[,.]\d{2})\s?(€|eur|euro)/i) || rawText.match(/total\s*[:]?\s*(\d+[,.]\d{2})/i);
+    const dateMatch = rawText.match(/(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})/);
+    const vendor = rawText.split(' ').slice(0, 6).join(' ').substring(0, 90);
+    const amount = amountMatch ? Number(amountMatch[1].replace(',', '.')) : null;
+
+    res.json({
+      vendor,
+      amount,
+      date: dateMatch ? dateMatch[1] : null,
+      category: detectCategory(rawText),
+      confidence: {
+        amount: amount ? 0.8 : 0.2,
+        date: dateMatch ? 0.75 : 0.2,
+      },
+      sourceText: rawText,
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Error procesando OCR' });
+  }
+});
+
 router.get('/download/:file', async (req, res) => {
   try {
     const { file } = req.params;

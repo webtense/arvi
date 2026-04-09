@@ -13,6 +13,7 @@ import { Assets } from './pages/Assets/Assets';
 import { Budgets } from './pages/Budgets/Budgets';
 import { Subcontractors } from './pages/Subcontractors/Subcontractors';
 import { Documents } from './pages/Documents/Documents';
+import { Clients } from './pages/Clients/Clients';
 
 import { Users } from './pages/Users/Users';
 import { Blog } from './pages/Blog/Blog';
@@ -94,6 +95,7 @@ function AppContent() {
           <Route path="facturas" element={<Invoices />} />
           <Route path="presupuestos" element={<Budgets />} />
           <Route path="subcontratas" element={<Subcontractors />} />
+          <Route path="clientes" element={<Clients />} />
           <Route path="documentos" element={<Documents />} />
 
           <Route path="usuarios" element={<Users />} />

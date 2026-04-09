@@ -6,6 +6,7 @@ import { useAccounting } from '../../context/AccountingContext';
 import { useClients } from '../../context/ClientsContext';
 import { QRCodeSVG } from 'qrcode.react';
 import { emitToast } from '../../utils/toast';
+import api from '../../services/api';
 import './Invoices.css';
 
 const UNIT_OPTIONS = [
@@ -27,7 +28,7 @@ const TAX_OPTIONS = [
 
 export const Invoices = () => {
     const { invoices, finalizeInvoice, importInvoices, addInvoice, getNextInvoiceNumber } = useAccounting();
-    const { clients, loading: clientsLoading, searchClients } = useClients();
+    const { clients, loading: clientsLoading, searchClients, addClient } = useClients();
     
     const [viewMode, setViewMode] = useState('list');
     const [selectedInvoice, setSelectedInvoice] = useState(null);
@@ -36,6 +37,9 @@ export const Invoices = () => {
     const [filter, setFilter] = useState('all');
     const [clientSearch, setClientSearch] = useState('');
     const [showClientDropdown, setShowClientDropdown] = useState(false);
+    const [historical, setHistorical] = useState([]);
+    const [historicalYears, setHistoricalYears] = useState({});
+    const [historicalFilters, setHistoricalFilters] = useState({ year: '', search: '', minAmount: '', maxAmount: '' });
 
     const emptyLine = () => ({
         id: Date.now() + Math.random(),
@@ -48,6 +52,7 @@ export const Invoices = () => {
     });
 
     const [newInvoice, setNewInvoice] = useState({
+        clientId: null,
         clientName: '',
         clientCif: '',
         clientAddress: '',
@@ -65,6 +70,20 @@ export const Invoices = () => {
             setShowClientDropdown(true);
         }
     }, [clientSearch]);
+
+    const loadHistorical = async (filters = historicalFilters) => {
+        try {
+            const result = await api.getHistoricalImports(filters);
+            setHistorical(result.data || []);
+            setHistoricalYears(result.years || {});
+        } catch (error) {
+            emitToast({ type: 'error', message: error.message || 'No se pudo cargar historico importado' });
+        }
+    };
+
+    useEffect(() => {
+        loadHistorical();
+    }, []);
 
     const calculateTotals = (items) => {
         const subtotal = items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
@@ -100,6 +119,7 @@ export const Invoices = () => {
     const selectClient = (client) => {
         setNewInvoice({
             ...newInvoice,
+            clientId: client.id,
             clientName: client.name,
             clientCif: client.cif || '',
             clientAddress: client.address || ''
@@ -128,6 +148,7 @@ export const Invoices = () => {
             date: newInvoice.date,
             dueDate: newInvoice.dueDate || null,
             clientName: newInvoice.clientName,
+            clientId: newInvoice.clientId,
             clientCif: newInvoice.clientCif,
             clientAddress: newInvoice.clientAddress,
             description: newInvoice.description,
@@ -150,6 +171,7 @@ export const Invoices = () => {
         
         setShowNewInvoiceModal(false);
         setNewInvoice({
+            clientId: null,
             clientName: '',
             clientCif: '',
             clientAddress: '',
@@ -352,7 +374,7 @@ export const Invoices = () => {
                                         type="text" 
                                         className="form-control" 
                                         value={clientSearch} 
-                                        onChange={(e) => { setClientSearch(e.target.value); setNewInvoice({ ...newInvoice, client: e.target.value }); }}
+                                        onChange={(e) => { setClientSearch(e.target.value); setNewInvoice({ ...newInvoice, clientName: e.target.value, clientId: null }); }}
                                         placeholder="Buscar cliente..."
                                     />
                                     <Search size={18} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
@@ -368,6 +390,24 @@ export const Invoices = () => {
                                                 </div>
                                             </div>
                                         ))}
+                                    </div>
+                                )}
+                                {showClientDropdown && clientSearch.length >= 2 && clients.length === 0 && (
+                                    <div style={{ marginTop: '8px', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                        <span className="text-muted" style={{ fontSize: '0.85rem' }}>Cliente no encontrado.</span>
+                                        <Button
+                                            variant="secondary"
+                                            size="small"
+                                            onClick={async () => {
+                                                try {
+                                                    const created = await addClient({ name: clientSearch, cif: newInvoice.clientCif, address: newInvoice.clientAddress });
+                                                    selectClient(created);
+                                                    emitToast({ type: 'success', message: 'Cliente creado y seleccionado' });
+                                                } catch (error) {
+                                                    emitToast({ type: 'error', message: error.message || 'No se pudo crear cliente' });
+                                                }
+                                            }}
+                                        >Crear cliente rapido</Button>
                                     </div>
                                 )}
                             </div>
@@ -485,6 +525,46 @@ export const Invoices = () => {
                 <button className={`filter-btn ${filter === 'draft' ? 'active' : ''}`} onClick={() => setFilter('draft')}>Borradores</button>
                 <button className={`filter-btn ${filter === 'definitive' ? 'active' : ''}`} onClick={() => setFilter('definitive')}>Finalizadas</button>
             </div>
+
+            <Card title="Panel historico importado" style={{ marginBottom: '1rem' }}>
+                <div style={{ display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', marginBottom: '1rem' }}>
+                    <select className="form-control" value={historicalFilters.year} onChange={(e) => setHistoricalFilters((p) => ({ ...p, year: e.target.value }))}>
+                        <option value="">Todos los anos</option>
+                        {Object.keys(historicalYears).sort().map((year) => (
+                            <option key={year} value={year}>{year} ({historicalYears[year]})</option>
+                        ))}
+                    </select>
+                    <input className="form-control" placeholder="Cliente / factura" value={historicalFilters.search} onChange={(e) => setHistoricalFilters((p) => ({ ...p, search: e.target.value }))} />
+                    <input className="form-control" type="number" placeholder="Importe min" value={historicalFilters.minAmount} onChange={(e) => setHistoricalFilters((p) => ({ ...p, minAmount: e.target.value }))} />
+                    <input className="form-control" type="number" placeholder="Importe max" value={historicalFilters.maxAmount} onChange={(e) => setHistoricalFilters((p) => ({ ...p, maxAmount: e.target.value }))} />
+                    <Button variant="secondary" onClick={() => loadHistorical()}>Aplicar filtros</Button>
+                </div>
+
+                <div style={{ maxHeight: '280px', overflow: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                            <tr style={{ borderBottom: '1px solid var(--border-color)', textAlign: 'left' }}>
+                                <th style={{ padding: '0.5rem 0' }}>Factura</th>
+                                <th>Cliente</th>
+                                <th>Fecha</th>
+                                <th style={{ textAlign: 'right' }}>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {historical.length === 0 ? (
+                                <tr><td colSpan={4} style={{ padding: '0.8rem 0', color: 'var(--text-muted)' }}>Sin resultados historicos.</td></tr>
+                            ) : historical.map((inv) => (
+                                <tr key={inv.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                                    <td style={{ padding: '0.55rem 0' }}>{inv.invoiceNumber}</td>
+                                    <td>{inv.clientName || '-'}</td>
+                                    <td>{(inv.finalDate || inv.date || '').toString().slice(0, 10)}</td>
+                                    <td style={{ textAlign: 'right' }}>{Number(inv.total || 0).toFixed(2)} €</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </Card>
 
             <div className="table-wrapper">
                 <table>

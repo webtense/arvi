@@ -3,10 +3,21 @@ const { prisma } = require('../lib/prisma');
 const authMiddleware = require('../middleware/auth');
 const messages = require('../lib/errors');
 const { validateEmail, validatePhone, validateCifNif, validateIban, sanitizeString } = require('../lib/validation');
+const fs = require('fs');
+const path = require('path');
 
 const router = Router();
 
 router.use(authMiddleware);
+
+const normalizeName = (value = '') =>
+  String(value)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 
 /**
  * @swagger
@@ -88,8 +99,106 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+router.get('/quality/duplicates', async (req, res, next) => {
+  try {
+    const clients = await prisma.client.findMany({ orderBy: { name: 'asc' } });
+
+    const byCif = new Map();
+    const byName = new Map();
+
+    clients.forEach((client) => {
+      if (client.cif) {
+        const key = client.cif.toUpperCase().trim();
+        if (!byCif.has(key)) byCif.set(key, []);
+        byCif.get(key).push(client);
+      }
+
+      const n = normalizeName(client.name);
+      if (n) {
+        if (!byName.has(n)) byName.set(n, []);
+        byName.get(n).push(client);
+      }
+    });
+
+    const cifDuplicates = [...byCif.entries()]
+      .filter(([, rows]) => rows.length > 1)
+      .map(([cif, rows]) => ({ type: 'cif', key: cif, count: rows.length, clients: rows }));
+
+    const nameDuplicates = [...byName.entries()]
+      .filter(([, rows]) => rows.length > 1)
+      .map(([nameKey, rows]) => ({ type: 'name', key: nameKey, count: rows.length, clients: rows }));
+
+    res.json({
+      totalClients: clients.length,
+      duplicates: [...cifDuplicates, ...nameDuplicates],
+      duplicateGroups: cifDuplicates.length + nameDuplicates.length,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/quality/reconcile', async (req, res, next) => {
+  try {
+    const clients = await prisma.client.findMany();
+    const byId = new Map(clients.map((c) => [c.id, c]));
+    const byCif = new Map();
+    const byName = new Map();
+
+    clients.forEach((client) => {
+      if (client.cif) byCif.set(client.cif.toUpperCase().trim(), client);
+      byName.set(normalizeName(client.name), client);
+    });
+
+    const invoices = await prisma.invoice.findMany();
+    let updated = 0;
+    const sample = [];
+
+    for (const invoice of invoices) {
+      let target = null;
+
+      if (invoice.clientId && byId.has(invoice.clientId)) {
+        continue;
+      }
+
+      if (invoice.clientCif) {
+        target = byCif.get(invoice.clientCif.toUpperCase().trim()) || null;
+      }
+
+      if (!target && invoice.clientName) {
+        target = byName.get(normalizeName(invoice.clientName)) || null;
+      }
+
+      if (target) {
+        await prisma.invoice.update({
+          where: { id: invoice.id },
+          data: {
+            clientId: target.id,
+            clientName: target.name,
+            clientCif: target.cif || invoice.clientCif,
+            clientAddress: target.address || invoice.clientAddress,
+          },
+        });
+        updated += 1;
+        if (sample.length < 20) {
+          sample.push({ invoiceId: invoice.id, invoiceNumber: invoice.invoiceNumber, clientId: target.id, clientName: target.name });
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      invoicesScanned: invoices.length,
+      invoicesReconciled: updated,
+      sample,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // GET /api/clients/:id - Get single client with invoices
-router.get('/:id', async (req, res, next) => {
+router.get('/:id(\\d+)', async (req, res, next) => {
   try {
     const { id } = req.params;
     const client = await prisma.client.findUnique({
@@ -107,6 +216,114 @@ router.get('/:id', async (req, res, next) => {
     }
     
     res.json(client);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/:id(\\d+)/ledger', async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const client = await prisma.client.findUnique({ where: { id } });
+    if (!client) {
+      return res.status(404).json({ error: messages.CLIENT_NOT_FOUND });
+    }
+
+    const [invoices, budgets] = await Promise.all([
+      prisma.invoice.findMany({
+        where: {
+          OR: [
+            { clientId: id },
+            { clientName: { equals: client.name, mode: 'insensitive' } },
+          ],
+        },
+        orderBy: { date: 'desc' },
+      }),
+      prisma.budget.findMany({
+        where: { client: { equals: client.name, mode: 'insensitive' } },
+        orderBy: { date: 'desc' },
+      }),
+    ]);
+
+    const totalInvoiced = invoices.reduce((sum, inv) => sum + Number(inv.total || 0), 0);
+    const pendingAmount = invoices
+      .filter((inv) => inv.paymentStatus !== 'paid')
+      .reduce((sum, inv) => sum + Number(inv.total || 0), 0);
+
+    res.json({
+      client,
+      totals: {
+        totalInvoiced,
+        pendingAmount,
+        invoicesCount: invoices.length,
+        budgetsCount: budgets.length,
+      },
+      invoices,
+      budgets,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/import-facturas', async (req, res, next) => {
+  try {
+    const baseDir = process.env.FACTURAS_DIR || '/home/asanchez/Documentos/@PERSONAL/Proyectos/ARVI/Facturas ';
+    if (!fs.existsSync(baseDir)) {
+      return res.status(400).json({ error: `No existe el directorio de facturas: ${baseDir}` });
+    }
+
+    const files = [];
+    const walk = (dir) => {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      entries.forEach((entry) => {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) return walk(full);
+        if (/\.(pdf|doc|docx|xls|xlsx)$/i.test(entry.name)) files.push(full);
+      });
+    };
+    walk(baseDir);
+
+    const importedClients = [];
+    for (const filePath of files) {
+      const baseName = path.basename(filePath, path.extname(filePath));
+      const normalized = baseName.replace(/[_-]+/g, ' ').trim();
+      const possibleCif = normalized.match(/\b[ABCDEFGHJKLMNPQRSUVW]\d{7}[0-9A-J]\b/i)?.[0] || null;
+      const withoutFactura = normalized.replace(/factura|fra\.?/ig, '').trim();
+      const clientName = withoutFactura
+        .replace(/\b\d{2,6}[./-]?\d{0,4}\b/g, '')
+        .replace(/\s{2,}/g, ' ')
+        .trim()
+        .slice(0, 120);
+
+      if (!clientName || clientName.length < 3) continue;
+
+      let existing = await prisma.client.findFirst({
+        where: {
+          OR: [
+            { name: { equals: clientName, mode: 'insensitive' } },
+            ...(possibleCif ? [{ cif: possibleCif.toUpperCase() }] : []),
+          ],
+        },
+      });
+
+      if (!existing) {
+        existing = await prisma.client.create({
+          data: {
+            name: clientName,
+            cif: possibleCif ? possibleCif.toUpperCase() : null,
+            notes: `Importado de historico local: ${filePath}`,
+          },
+        });
+        importedClients.push(existing);
+      }
+    }
+
+    res.json({
+      scannedFiles: files.length,
+      importedClients: importedClients.length,
+      clients: importedClients,
+    });
   } catch (error) {
     next(error);
   }
@@ -203,7 +420,7 @@ router.post('/', async (req, res, next) => {
 });
 
 // PUT /api/clients/:id - Update client
-router.put('/:id', async (req, res, next) => {
+router.put('/:id(\\d+)', async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name, cif, email, phone, address, iban, contactPerson, notes } = req.body;
@@ -229,7 +446,7 @@ router.put('/:id', async (req, res, next) => {
 });
 
 // DELETE /api/clients/:id - Delete client
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id(\\d+)', async (req, res, next) => {
   try {
     const { id } = req.params;
     const parsedId = parseInt(id);
