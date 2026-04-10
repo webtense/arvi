@@ -4,6 +4,7 @@ import { Button } from '../../components/Button/Button';
 import { useClients } from '../../context/ClientsContext';
 import api from '../../services/api';
 import { emitToast } from '../../utils/toast';
+import { Plus, X } from 'lucide-react';
 
 const emptyClient = {
   name: '',
@@ -17,6 +18,7 @@ export const Clients = () => {
   const { clients, loading, addClient, updateClient, deleteClient, searchClients } = useClients();
   const [form, setForm] = useState(emptyClient);
   const [editingId, setEditingId] = useState(null);
+  const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [selectedClient, setSelectedClient] = useState(null);
   const [ledger, setLedger] = useState(null);
@@ -44,9 +46,16 @@ export const Clients = () => {
       }
       setForm(emptyClient);
       setEditingId(null);
+      setIsClientModalOpen(false);
     } catch (error) {
       emitToast({ type: 'error', message: error.message || 'No se pudo guardar el cliente' });
     }
+  };
+
+  const openCreateModal = () => {
+    setEditingId(null);
+    setForm(emptyClient);
+    setIsClientModalOpen(true);
   };
 
   const editClient = (client) => {
@@ -58,6 +67,7 @@ export const Clients = () => {
       phone: client.phone || '',
       address: client.address || '',
     });
+    setIsClientModalOpen(true);
   };
 
   const removeClient = async (id) => {
@@ -117,36 +127,68 @@ export const Clients = () => {
     }
   };
 
+  const kpis = useMemo(() => {
+    const total = sortedClients.length;
+    const withEmail = sortedClients.filter((c) => c.email && c.email.includes('@')).length;
+    const withCif = sortedClients.filter((c) => c.cif && c.cif.trim().length > 0).length;
+    const imported = sortedClients.filter((c) => (c.notes || '').toLowerCase().includes('importado')).length;
+    const incomplete = sortedClients.filter((c) => !c.email || !c.cif).length;
+
+    return {
+      total,
+      withEmail,
+      withCif,
+      imported,
+      incomplete,
+      emailRate: total > 0 ? Math.round((withEmail / total) * 100) : 0,
+      cifRate: total > 0 ? Math.round((withCif / total) * 100) : 0,
+    };
+  }, [sortedClients]);
+
   return (
     <div className="dashboard">
       <header className="page-header">
         <div>
           <h2>Clientes</h2>
-          <p className="text-muted">Base maestra de clientes y trazabilidad de facturacion.</p>
+          <p className="text-muted">Base maestra, calidad de datos y trazabilidad de facturacion.</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <Button variant="primary" onClick={openCreateModal}><Plus size={14} /> Nuevo cliente</Button>
           <Button variant="secondary" onClick={importHistory}>Importar desde carpeta Facturas</Button>
           <Button variant="secondary" onClick={runDuplicateAudit}>Validar duplicados</Button>
           <Button variant="secondary" onClick={runReconcile}>Conciliar facturas</Button>
         </div>
       </header>
 
-      <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
-        <Card title={editingId ? 'Editar cliente' : 'Nuevo cliente'}>
-          <div style={{ display: 'grid', gap: 10 }}>
-            <input className="form-control" placeholder="Nombre" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} />
-            <input className="form-control" placeholder="CIF" value={form.cif} onChange={(e) => setForm((p) => ({ ...p, cif: e.target.value }))} />
-            <input className="form-control" placeholder="Email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} />
-            <input className="form-control" placeholder="Telefono" value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} />
-            <input className="form-control" placeholder="Direccion postal" value={form.address} onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))} />
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <Button variant="primary" onClick={saveClient}>{editingId ? 'Actualizar' : 'Crear cliente'}</Button>
-              {editingId && <Button variant="secondary" onClick={() => { setEditingId(null); setForm(emptyClient); }}>Cancelar</Button>}
-            </div>
-          </div>
+      <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', marginBottom: 16 }}>
+        <Card className="kpi-card">
+          <small>Total clientes</small>
+          <h3>{kpis.total}</h3>
+          <div className="text-muted" style={{ fontSize: '0.85rem' }}>Base activa</div>
         </Card>
+        <Card className="kpi-card">
+          <small>Clientes con email</small>
+          <h3>{kpis.withEmail}</h3>
+          <div className="text-muted" style={{ fontSize: '0.85rem' }}>{kpis.emailRate}% cobertura</div>
+        </Card>
+        <Card className="kpi-card">
+          <small>Clientes con CIF</small>
+          <h3>{kpis.withCif}</h3>
+          <div className="text-muted" style={{ fontSize: '0.85rem' }}>{kpis.cifRate}% cobertura</div>
+        </Card>
+        <Card className="kpi-card">
+          <small>Importados historico</small>
+          <h3>{kpis.imported}</h3>
+          <div className="text-muted" style={{ fontSize: '0.85rem' }}>Facturas antiguas</div>
+        </Card>
+        <Card className="kpi-card">
+          <small>Ficha incompleta</small>
+          <h3>{kpis.incomplete}</h3>
+          <div className="text-muted" style={{ fontSize: '0.85rem' }}>Sin email o CIF</div>
+        </Card>
+      </div>
 
-        <Card title="Listado de clientes">
+      <Card title="Listado de clientes">
           <div style={{ display: 'grid', gap: 10 }}>
             <div style={{ display: 'flex', gap: 8 }}>
               <input className="form-control" placeholder="Buscar cliente..." value={query} onChange={(e) => setQuery(e.target.value)} />
@@ -170,8 +212,43 @@ export const Clients = () => {
               ))}
             </div>
           </div>
-        </Card>
-      </div>
+      </Card>
+
+      {isClientModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <Card style={{ width: '100%', maxWidth: 560 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <h3 style={{ margin: 0 }}>{editingId ? 'Editar cliente' : 'Nuevo cliente'}</h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsClientModalOpen(false);
+                  setEditingId(null);
+                  setForm(emptyClient);
+                }}
+                style={{ border: 'none', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div style={{ display: 'grid', gap: 10 }}>
+              <input className="form-control" placeholder="Nombre" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} />
+              <input className="form-control" placeholder="CIF" value={form.cif} onChange={(e) => setForm((p) => ({ ...p, cif: e.target.value }))} />
+              <input className="form-control" placeholder="Email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} />
+              <input className="form-control" placeholder="Telefono" value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} />
+              <input className="form-control" placeholder="Direccion postal" value={form.address} onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))} />
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end', marginTop: 8 }}>
+                <Button variant="secondary" onClick={() => {
+                  setIsClientModalOpen(false);
+                  setEditingId(null);
+                  setForm(emptyClient);
+                }}>Cancelar</Button>
+                <Button variant="primary" onClick={saveClient}>{editingId ? 'Actualizar' : 'Crear cliente'}</Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
 
       {ledger && (
         <Card title={`Historial financiero - ${selectedClient?.name || ''}`} style={{ marginTop: 16 }}>
