@@ -31,6 +31,7 @@ export const Sidebar = () => {
                     <h1 className="sidebar-logo">ARVI</h1>
                     <div className="logo-bracket-bottom"></div>
                     <p className="sidebar-subtitle">Manteniments Integrals, S.L.</p>
+                    <span className="sidebar-version-badge">v3</span>
                 </div>
             </div>
 
