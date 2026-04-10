@@ -68,19 +68,30 @@ export const AccountingProvider = ({ children }) => {
         localStorage.setItem('arvi_parts', JSON.stringify(parts));
     }, [invoices, budgets, parts]);
 
-    const getNextInvoiceNumber = (isDefinitive) => {
-        const year = new Date().getFullYear();
-        const definitiveCount = invoices.filter(inv => inv.type === 'definitive').length;
-        if (isDefinitive) {
-            return `${year}/${(definitiveCount + 1).toString().padStart(3, '0')}`;
-        }
-        const draftCount = invoices.filter(inv => inv.type === 'draft').length;
-        return `DRAFT-${year}-${(draftCount + 1).toString().padStart(3, '0')}`;
+    const getNextLocalInvoiceNumber = (referenceDate = new Date(), source = invoices) => {
+        const date = referenceDate instanceof Date ? referenceDate : new Date(referenceDate);
+        const year = Number.isNaN(date.getFullYear()) ? new Date().getFullYear() : date.getFullYear();
+        const prefix = `${year}/`;
+        const maxSequential = source.reduce((max, invoice) => {
+            if (!invoice.invoiceNumber || !invoice.invoiceNumber.startsWith(prefix)) return max;
+            const match = invoice.invoiceNumber.match(/\/(\d+)/);
+            if (!match) return max;
+            const number = parseInt(match[1], 10);
+            if (!Number.isFinite(number)) return max;
+            return number > max ? number : max;
+        }, 0);
+        const next = maxSequential + 1;
+        return `${year}/${next.toString().padStart(3, '0')}`;
+    };
+
+    const ensureLocalInvoiceNumber = (invoice, source = invoices) => {
+        const valid = /^\d{4}\/\d{3,}$/.test(invoice.invoiceNumber || '');
+        if (valid) return invoice.invoiceNumber;
+        return getNextLocalInvoiceNumber(invoice.date ? new Date(invoice.date) : new Date(), source);
     };
 
     const convertToInvoice = async (source, sourceType) => {
         const newInvoice = {
-            invoiceNumber: getNextInvoiceNumber(false),
             date: new Date().toISOString().split('T')[0],
             client: source.client,
             description: source.work || source.description || 'Facturación de servicios',
@@ -112,33 +123,38 @@ export const AccountingProvider = ({ children }) => {
             
             return created;
         } catch (error) {
-            setInvoices(prev => [{ ...newInvoice, id: Date.now().toString() }, ...prev]);
+            const fallback = { ...newInvoice, id: Date.now().toString(), invoiceNumber: ensureLocalInvoiceNumber(newInvoice) };
+            setInvoices(prev => [fallback, ...prev]);
             emitToast({ type: 'info', message: 'Factura guardada en local. Pendiente de sincronizar.' });
-            return newInvoice;
+            return fallback;
         }
     };
 
     const finalizeInvoice = async (invoiceId) => {
-        const prevInvoice = invoices.filter(inv => inv.type === 'definitive').slice(-1)[0];
-        const prevHash = prevInvoice ? prevInvoice.hash : '00000000000000000000000000000000';
-        
-        const newHash = btoa(invoiceId + prevHash).slice(0, 32);
-        
-        const updatedInvoice = {
-            invoiceNumber: getNextInvoiceNumber(true),
-            status: 'finalized',
-            type: 'definitive',
-            hash: newHash,
-            prevHash: prevHash,
-            finalDate: new Date().toISOString().split('T')[0]
-        };
-
         try {
-            await api.finalizeInvoice(invoiceId);
-            setInvoices(prev => prev.map(inv => inv.id === invoiceId ? { ...inv, ...updatedInvoice } : inv));
+            const updated = await api.finalizeInvoice(invoiceId);
+            setInvoices(prev => prev.map(inv => inv.id === invoiceId ? updated : inv));
             emitToast({ type: 'success', message: 'Factura finalizada correctamente.' });
         } catch (error) {
-            setInvoices(prev => prev.map(inv => inv.id === invoiceId ? { ...inv, ...updatedInvoice } : inv));
+            const today = new Date().toISOString().split('T')[0];
+            setInvoices(prev => {
+                const prevInvoice = prev.filter(inv => inv.type === 'definitive').slice(-1)[0];
+                const prevHash = prevInvoice ? prevInvoice.hash : '00000000000000000000000000000000';
+                const newHash = btoa(invoiceId + prevHash).slice(0, 32);
+                return prev.map(inv => {
+                    if (inv.id !== invoiceId) return inv;
+                    const invoiceNumber = ensureLocalInvoiceNumber(inv, prev);
+                    return {
+                        ...inv,
+                        invoiceNumber,
+                        status: 'finalized',
+                        type: 'definitive',
+                        hash: newHash,
+                        prevHash,
+                        finalDate: today
+                    };
+                });
+            });
             emitToast({ type: 'info', message: 'Factura finalizada en local. Pendiente de sincronizar.' });
         }
     };
@@ -162,15 +178,18 @@ export const AccountingProvider = ({ children }) => {
     const addInvoice = async (newInvoice) => {
         const invoiceData = {
             ...newInvoice,
-            date: new Date().toISOString().split('T')[0]
+            date: newInvoice.date || new Date().toISOString().split('T')[0]
         };
         try {
             const created = await api.createInvoice(invoiceData);
             setInvoices(prev => [created, ...prev]);
             emitToast({ type: 'success', message: 'Factura en borrador creada correctamente.' });
+            return created;
         } catch (error) {
-            setInvoices(prev => [{ ...invoiceData, id: Date.now().toString() }, ...prev]);
+            const fallback = { ...invoiceData, id: Date.now().toString(), invoiceNumber: ensureLocalInvoiceNumber(invoiceData) };
+            setInvoices(prev => [fallback, ...prev]);
             emitToast({ type: 'info', message: 'Factura guardada en local. Pendiente de sincronizar.' });
+            return fallback;
         }
     };
 
@@ -192,8 +211,7 @@ export const AccountingProvider = ({ children }) => {
             finalizeInvoice,
             importInvoices,
             addPart,
-            addInvoice,
-            getNextInvoiceNumber
+            addInvoice
         }}>
             {children}
         </AccountingContext.Provider>

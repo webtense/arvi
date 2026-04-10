@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card } from '../../components/Card/Card';
 import { Button } from '../../components/Button/Button';
 import { FileText, Printer, ChevronLeft, CheckCircle, AlertTriangle, Download, Upload, Plus, Save, Trash2, X, Search, User, Pencil } from 'lucide-react';
@@ -6,6 +6,7 @@ import { useAccounting } from '../../context/AccountingContext';
 import { useClients } from '../../context/ClientsContext';
 import { QRCodeSVG } from 'qrcode.react';
 import { emitToast } from '../../utils/toast';
+import { formatDate, parseDateInput, getTodayISO } from '../../utils/dates';
 import api from '../../services/api';
 import './Invoices.css';
 
@@ -27,8 +28,8 @@ const TAX_OPTIONS = [
 ];
 
 export const Invoices = () => {
-    const { invoices, finalizeInvoice, importInvoices, addInvoice, getNextInvoiceNumber } = useAccounting();
-    const { clients, loading: clientsLoading, searchClients, addClient } = useClients();
+    const { invoices, finalizeInvoice, addInvoice } = useAccounting();
+    const { addClient } = useClients();
     
     const [viewMode, setViewMode] = useState('list');
     const [selectedInvoice, setSelectedInvoice] = useState(null);
@@ -36,10 +37,15 @@ export const Invoices = () => {
     const [showNewInvoiceModal, setShowNewInvoiceModal] = useState(false);
     const [filter, setFilter] = useState('all');
     const [clientSearch, setClientSearch] = useState('');
+    const [clientResults, setClientResults] = useState([]);
+    const [clientSearchLoading, setClientSearchLoading] = useState(false);
+    const clientDropdownRef = useRef(null);
     const [showClientDropdown, setShowClientDropdown] = useState(false);
     const [historical, setHistorical] = useState([]);
     const [historicalYears, setHistoricalYears] = useState({});
     const [historicalFilters, setHistoricalFilters] = useState({ year: '', search: '', minAmount: '', maxAmount: '' });
+    const [dateDisplay, setDateDisplay] = useState(() => formatDate(getTodayISO()));
+    const [dueDateDisplay, setDueDateDisplay] = useState('');
 
     const emptyLine = () => ({
         id: Date.now() + Math.random(),
@@ -51,12 +57,12 @@ export const Invoices = () => {
         total: 0
     });
 
-    const [newInvoice, setNewInvoice] = useState({
+    const createNewInvoiceState = () => ({
         clientId: null,
         clientName: '',
         clientCif: '',
         clientAddress: '',
-        date: new Date().toISOString().split('T')[0],
+        date: getTodayISO(),
         dueDate: '',
         description: '',
         items: [emptyLine()],
@@ -64,12 +70,67 @@ export const Invoices = () => {
         paymentMethod: 'transfer'
     });
 
+    const [newInvoice, setNewInvoice] = useState(() => createNewInvoiceState());
+
+    const resetInvoiceForm = () => {
+        const freshState = createNewInvoiceState();
+        setNewInvoice(freshState);
+        setDateDisplay(formatDate(freshState.date));
+        setDueDateDisplay('');
+        setClientSearch('');
+        setClientResults([]);
+        setShowClientDropdown(false);
+    };
+
+    const closeInvoiceModal = () => {
+        setShowNewInvoiceModal(false);
+        resetInvoiceForm();
+    };
+
+    const handleDateFieldChange = (field, value) => {
+        if (field === 'date') setDateDisplay(value);
+        if (field === 'dueDate') setDueDateDisplay(value);
+        const iso = parseDateInput(value);
+        setNewInvoice((prev) => ({ ...prev, [field]: iso }));
+    };
+
     useEffect(() => {
-        if (clientSearch.length >= 2) {
-            searchClients(clientSearch);
-            setShowClientDropdown(true);
+        if (clientSearch.trim().length < 2) {
+            setClientResults([]);
+            setShowClientDropdown(false);
+            return;
         }
+
+        let active = true;
+        setClientSearchLoading(true);
+        api.getClients(clientSearch.trim())
+            .then((data) => {
+                if (!active) return;
+                setClientResults(data || []);
+                setShowClientDropdown(true);
+            })
+            .catch(() => {
+                if (!active) return;
+                setClientResults([]);
+            })
+            .finally(() => {
+                if (active) setClientSearchLoading(false);
+            });
+
+        return () => {
+            active = false;
+        };
     }, [clientSearch]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (clientDropdownRef.current && !clientDropdownRef.current.contains(event.target)) {
+                setShowClientDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const loadHistorical = async (filters = historicalFilters) => {
         try {
@@ -134,6 +195,11 @@ export const Invoices = () => {
             return;
         }
 
+        if (!newInvoice.date) {
+            emitToast({ type: 'error', message: 'Indica una fecha valida (DD/MM/AAAA)' });
+            return;
+        }
+
         const hasValidItems = newInvoice.items.some(item => item.description && item.unitPrice > 0);
         if (!hasValidItems) {
             emitToast({ type: 'error', message: 'Añade al menos una línea con descripción y precio' });
@@ -144,7 +210,6 @@ export const Invoices = () => {
 
         const invoice = {
             id: Date.now().toString(),
-            invoiceNumber: getNextInvoiceNumber(false),
             date: newInvoice.date,
             dueDate: newInvoice.dueDate || null,
             clientName: newInvoice.clientName,
@@ -169,20 +234,7 @@ export const Invoices = () => {
         addInvoice(invoice);
         emitToast({ type: 'success', message: 'Factura creada correctamente' });
         
-        setShowNewInvoiceModal(false);
-        setNewInvoice({
-            clientId: null,
-            clientName: '',
-            clientCif: '',
-            clientAddress: '',
-            date: new Date().toISOString().split('T')[0],
-            dueDate: '',
-            description: '',
-            items: [emptyLine()],
-            notes: '',
-            paymentMethod: 'transfer'
-        });
-        setClientSearch('');
+        closeInvoiceModal();
     };
 
     const handlePreview = (invoice) => {
@@ -245,7 +297,7 @@ export const Invoices = () => {
                             {inv.type === 'draft' ? 'FACTURA ESBORRANY' : 'FACTURA'}
                         </h2>
                         <p style={{ margin: '5px 0' }}>Número: <strong>{inv.invoiceNumber}</strong></p>
-                        <p style={{ margin: '5px 0' }}>Data: <strong>{inv.finalDate || inv.date}</strong></p>
+                        <p style={{ margin: '5px 0' }}>Data: <strong>{formatDate(inv.finalDate || inv.date, '-')}</strong></p>
                     </div>
                     {(inv.status === 'finalized' || inv.type === 'definitive') && (
                         <div style={{ textAlign: 'right' }}>
@@ -361,53 +413,58 @@ export const Invoices = () => {
                     <Card style={{ maxWidth: '800px', width: '100%', margin: '1rem 0', padding: '1.5rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                             <h3>Nueva Factura</h3>
-                            <button onClick={() => setShowNewInvoiceModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.5rem' }}>
+                            <button onClick={closeInvoiceModal} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.5rem' }}>
                                 <X size={24} />
                             </button>
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-                            <div className="form-group">
+                            <div className="form-group" ref={clientDropdownRef} style={{ position: 'relative' }}>
                                 <label>Cliente *</label>
                                 <div style={{ position: 'relative' }}>
                                     <input 
                                         type="text" 
                                         className="form-control" 
                                         value={clientSearch} 
+                                        onFocus={() => clientResults.length > 0 && setShowClientDropdown(true)}
                                         onChange={(e) => { setClientSearch(e.target.value); setNewInvoice({ ...newInvoice, clientName: e.target.value, clientId: null }); }}
                                         placeholder="Buscar cliente..."
                                     />
                                     <Search size={18} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                                 </div>
-                                {showClientDropdown && clients.length > 0 && (
-                                    <div style={{ position: 'absolute', zIndex: 10, background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px', maxHeight: '200px', overflow: 'auto', width: '100%', marginTop: '4px', boxShadow: 'var(--shadow-dropdown)' }}>
-                                        {clients.map(client => (
-                                            <div key={client.id} onClick={() => selectClient(client)} style={{ padding: '0.75rem', cursor: 'pointer', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                {showClientDropdown && (
+                                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 20, background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px', maxHeight: '220px', overflow: 'auto', marginTop: '4px', boxShadow: 'var(--shadow-dropdown)' }}>
+                                        {clientSearchLoading && (
+                                            <div style={{ padding: '0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>Buscando clientes...</div>
+                                        )}
+                                        {!clientSearchLoading && clientResults.length === 0 && clientSearch.length >= 2 && (
+                                            <div style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                                <span className="text-muted" style={{ fontSize: '0.85rem' }}>Cliente no encontrado.</span>
+                                                <Button
+                                                    variant="secondary"
+                                                    size="small"
+                                                    onClick={async () => {
+                                                        try {
+                                                            const created = await addClient({ name: clientSearch, cif: newInvoice.clientCif, address: newInvoice.clientAddress });
+                                                            selectClient(created);
+                                                            setClientResults((prev) => [created, ...prev]);
+                                                            emitToast({ type: 'success', message: 'Cliente creado y seleccionado' });
+                                                        } catch (error) {
+                                                            emitToast({ type: 'error', message: error.message || 'No se pudo crear cliente' });
+                                                        }
+                                                    }}
+                                                >Crear cliente rapido</Button>
+                                            </div>
+                                        )}
+                                        {!clientSearchLoading && clientResults.map(client => (
+                                            <button key={client.id} type="button" onClick={() => selectClient(client)} style={{ width: '100%', padding: '0.75rem', textAlign: 'left', cursor: 'pointer', border: 'none', borderBottom: '1px solid var(--border-color)', background: 'transparent', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                                 <User size={16} />
                                                 <div>
                                                     <div style={{ fontWeight: 500 }}>{client.name}</div>
-                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{client.cif}</div>
+                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{client.cif || 'Sin CIF'}</div>
                                                 </div>
-                                            </div>
+                                            </button>
                                         ))}
-                                    </div>
-                                )}
-                                {showClientDropdown && clientSearch.length >= 2 && clients.length === 0 && (
-                                    <div style={{ marginTop: '8px', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                                        <span className="text-muted" style={{ fontSize: '0.85rem' }}>Cliente no encontrado.</span>
-                                        <Button
-                                            variant="secondary"
-                                            size="small"
-                                            onClick={async () => {
-                                                try {
-                                                    const created = await addClient({ name: clientSearch, cif: newInvoice.clientCif, address: newInvoice.clientAddress });
-                                                    selectClient(created);
-                                                    emitToast({ type: 'success', message: 'Cliente creado y seleccionado' });
-                                                } catch (error) {
-                                                    emitToast({ type: 'error', message: error.message || 'No se pudo crear cliente' });
-                                                }
-                                            }}
-                                        >Crear cliente rapido</Button>
                                     </div>
                                 )}
                             </div>
@@ -417,11 +474,25 @@ export const Invoices = () => {
                             </div>
                             <div className="form-group">
                                 <label>Fecha</label>
-                                <input type="date" className="form-control" value={newInvoice.date} onChange={(e) => setNewInvoice({ ...newInvoice, date: e.target.value })} />
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="DD/MM/AAAA"
+                                    inputMode="numeric"
+                                    value={dateDisplay}
+                                    onChange={(e) => handleDateFieldChange('date', e.target.value)}
+                                />
                             </div>
                             <div className="form-group">
                                 <label>Fecha Vencimiento</label>
-                                <input type="date" className="form-control" value={newInvoice.dueDate} onChange={(e) => setNewInvoice({ ...newInvoice, dueDate: e.target.value })} />
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="DD/MM/AAAA"
+                                    inputMode="numeric"
+                                    value={dueDateDisplay}
+                                    onChange={(e) => handleDateFieldChange('dueDate', e.target.value)}
+                                />
                             </div>
                         </div>
 
@@ -511,7 +582,7 @@ export const Invoices = () => {
                         </div>
 
                         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1.5rem', flexWrap: 'wrap' }}>
-                            <Button variant="secondary" onClick={() => setShowNewInvoiceModal(false)}>Cancelar</Button>
+                            <Button variant="secondary" onClick={closeInvoiceModal}>Cancelar</Button>
                             <Button variant="primary" onClick={handleCreateInvoice}>
                                 <Save size={16} /> Guardar Factura
                             </Button>
@@ -557,7 +628,7 @@ export const Invoices = () => {
                                 <tr key={inv.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                                     <td style={{ padding: '0.55rem 0' }}>{inv.invoiceNumber}</td>
                                     <td>{inv.clientName || '-'}</td>
-                                    <td>{(inv.finalDate || inv.date || '').toString().slice(0, 10)}</td>
+                                    <td>{formatDate(inv.finalDate || inv.date, '-')}</td>
                                     <td style={{ textAlign: 'right' }}>{Number(inv.total || 0).toFixed(2)} €</td>
                                 </tr>
                             ))}
@@ -590,7 +661,7 @@ export const Invoices = () => {
                                 <tr key={inv.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                                     <td style={{ padding: '0.75rem' }}><strong>{inv.invoiceNumber}</strong></td>
                                     <td style={{ padding: '0.75rem' }}>{inv.clientName || inv.client}</td>
-                                    <td style={{ padding: '0.75rem' }}>{inv.finalDate || inv.date}</td>
+                                    <td style={{ padding: '0.75rem' }}>{formatDate(inv.finalDate || inv.date, '-')}</td>
                                     <td style={{ padding: '0.75rem' }}>{inv.total.toFixed(2)} €</td>
                                     <td style={{ padding: '0.75rem' }}>
                                         <span className={`status-badge ${inv.status === 'finalized' ? 'definitive' : 'draft'}`}>

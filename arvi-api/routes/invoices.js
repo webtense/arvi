@@ -6,6 +6,48 @@ const messages = require('../lib/errors');
 const router = Router();
 const authorizeRoles = authMiddleware.authorizeRoles;
 
+const ARVI_DESCRIPTION = [
+  'Reparem el passat | Mantenim el present | Instal·lem el futur',
+  'ARVI MANTENIMENTS INTEGRALS S.L.',
+  'C/ Sentmenat, 5 · Sabadell BCN 08203',
+  'Tel. +34 669 47 55 83 · vendes@arvimanteniment.com'
+].join('\n');
+
+const isStandardInvoiceNumber = (value = '') => /^\d{4}\/\d{3,}$/.test(value);
+const isHistoricalInvoice = (invoiceNumber = '', notes = '') => /^H\d{4}\//i.test(invoiceNumber) || (notes || '').toUpperCase().includes('IMPORT_HISTORICO');
+
+const ensureArviBranding = (invoice) => {
+  if (!invoice) return invoice;
+  if (isHistoricalInvoice(invoice.invoiceNumber, invoice.notes)) {
+    const hasBranding = typeof invoice.description === 'string' && invoice.description.toLowerCase().includes('arvi');
+    if (!hasBranding) {
+      return { ...invoice, description: ARVI_DESCRIPTION };
+    }
+  }
+  return invoice;
+};
+
+const brandInvoices = (records) => Array.isArray(records) ? records.map(ensureArviBranding) : ensureArviBranding(records);
+
+const getNextSequentialInvoiceNumber = async (inputDate) => {
+  const date = inputDate ? new Date(inputDate) : new Date();
+  const targetDate = Number.isNaN(date.getTime()) ? new Date() : date;
+  const year = targetDate.getFullYear();
+  const prefix = `${year}/`;
+  const existing = await prisma.invoice.findMany({
+    where: { invoiceNumber: { startsWith: prefix } },
+    select: { invoiceNumber: true }
+  });
+  const maxSequential = existing.reduce((max, invoice) => {
+    const match = invoice.invoiceNumber?.match(/^(\d{4})\/(\d+)/);
+    if (!match) return max;
+    const number = parseInt(match[2], 10);
+    return Number.isFinite(number) && number > max ? number : max;
+  }, 0);
+  const next = maxSequential + 1;
+  return `${year}/${next.toString().padStart(3, '0')}`;
+};
+
 router.use(authMiddleware, authorizeRoles('admin'));
 
 router.get('/', async (req, res, next) => {
@@ -34,7 +76,7 @@ router.get('/', async (req, res, next) => {
       where.date = { gte: new Date(startDate), lte: new Date(endDate) };
     }
 
-    const [invoices, total] = await Promise.all([
+    const [rows, total] = await Promise.all([
       prisma.invoice.findMany({
         where,
         include: { items: true, project: true },
@@ -44,6 +86,8 @@ router.get('/', async (req, res, next) => {
       }),
       prisma.invoice.count({ where })
     ]);
+
+    const invoices = brandInvoices(rows);
 
     res.json({
       data: invoices,
@@ -107,11 +151,8 @@ router.get('/stats', async (req, res, next) => {
 
 router.get('/next-number', async (req, res) => {
   try {
-    const year = new Date().getFullYear();
-    const count = await prisma.invoice.count({
-      where: { invoiceNumber: { startsWith: `${year}/` } }
-    });
-    res.json({ nextNumber: `${year}/${(count + 1).toString().padStart(4, '0')}` });
+    const nextNumber = await getNextSequentialInvoiceNumber(new Date());
+    res.json({ nextNumber });
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener número' });
   }
@@ -170,6 +211,8 @@ router.get('/historical-imports', async (req, res, next) => {
       }),
     ]);
 
+    const brandedRows = brandInvoices(rows);
+
     const years = {};
     grouped.forEach((entry) => {
       const y = String(entry.invoiceNumber || '').match(/^H(\d{4})\//)?.[1];
@@ -177,7 +220,7 @@ router.get('/historical-imports', async (req, res, next) => {
     });
 
     res.json({
-      data: rows,
+      data: brandedRows,
       pagination: {
         page: pageNum,
         limit: limitNum,
@@ -201,7 +244,7 @@ router.get('/:id', async (req, res) => {
     if (!invoice) {
       return res.status(404).json({ error: 'Factura no encontrada' });
     }
-    res.json(invoice);
+    res.json(ensureArviBranding(invoice));
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener factura' });
   }
@@ -214,11 +257,14 @@ router.post('/', async (req, res) => {
     const subtotal = items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
     const taxTotal = items.reduce((sum, item) => sum + (item.unitPrice * item.quantity * item.tax / 100), 0);
     const total = subtotal + taxTotal;
-
-    const year = new Date().getFullYear();
-    const count = await prisma.invoice.count({
-      where: { invoiceNumber: { startsWith: `${year}/` } }
-    });
+    const invoiceDate = invoiceData.date ? new Date(invoiceData.date) : new Date();
+    const normalizedDate = Number.isNaN(invoiceDate.getTime()) ? new Date() : invoiceDate;
+    const nextNumber = await getNextSequentialInvoiceNumber(normalizedDate);
+    const incomingNumber = invoiceData.invoiceNumber;
+    const shouldKeepIncoming = incomingNumber && (isHistoricalInvoice(incomingNumber, invoiceData.notes) || isStandardInvoiceNumber(incomingNumber));
+    const invoiceNumber = shouldKeepIncoming ? incomingNumber : nextNumber;
+    const dueDateValue = invoiceData.dueDate ? new Date(invoiceData.dueDate) : null;
+    const normalizedDueDate = dueDateValue && !Number.isNaN(dueDateValue.getTime()) ? dueDateValue : null;
 
     const invoice = await prisma.invoice.create({
       data: {
@@ -232,9 +278,9 @@ router.post('/', async (req, res) => {
         projectId: invoiceData.projectId ? parseInt(invoiceData.projectId, 10) : null,
         status: invoiceData.status || 'draft',
         type: invoiceData.type || 'draft',
-        invoiceNumber: invoiceData.invoiceNumber || `${year}/${(count + 1).toString().padStart(4, '0')}`,
-        date: new Date(invoiceData.date),
-        dueDate: invoiceData.dueDate ? new Date(invoiceData.dueDate) : null,
+        invoiceNumber,
+        date: normalizedDate,
+        dueDate: normalizedDueDate,
         subtotal,
         taxTotal,
         total,
@@ -252,7 +298,7 @@ router.post('/', async (req, res) => {
       include: { items: true }
     });
 
-    res.status(201).json(invoice);
+    res.status(201).json(ensureArviBranding(invoice));
   } catch (error) {
     console.error('Error creating invoice:', error);
     res.status(500).json({ error: 'Error al crear factura' });
@@ -302,7 +348,7 @@ router.put('/:id', async (req, res) => {
         },
         include: { items: true }
       });
-      res.json(invoice);
+      res.json(ensureArviBranding(invoice));
     } else {
       const invoice = await prisma.invoice.update({
         where: { id: parseInt(id) },
@@ -321,7 +367,7 @@ router.put('/:id', async (req, res) => {
           ...(invoiceData.dueDate !== undefined ? { dueDate: invoiceData.dueDate ? new Date(invoiceData.dueDate) : null } : {}),
         }
       });
-      res.json(invoice);
+      res.json(ensureArviBranding(invoice));
     }
   } catch (error) {
     res.status(500).json({ error: 'Error al actualizar factura' });
@@ -356,9 +402,13 @@ router.post('/:id/finalize', async (req, res) => {
     const invoiceData = `${existingInvoice.invoiceNumber}${existingInvoice.total}${prevHash}${Date.now()}`;
     const newHash = require('crypto').createHash('sha256').update(invoiceData).digest('hex').toUpperCase();
 
+    const needsNewNumber = !isHistoricalInvoice(existingInvoice.invoiceNumber, existingInvoice.notes) && !isStandardInvoiceNumber(existingInvoice.invoiceNumber);
+    const definitiveNumber = needsNewNumber ? await getNextSequentialInvoiceNumber(existingInvoice.date || new Date()) : existingInvoice.invoiceNumber;
+
     const invoice = await prisma.invoice.update({
       where: { id: parseInt(id) },
       data: {
+        invoiceNumber: definitiveNumber,
         status: 'finalized',
         type: 'definitive',
         hash: newHash,
@@ -368,7 +418,7 @@ router.post('/:id/finalize', async (req, res) => {
       include: { items: true }
     });
 
-    res.json(invoice);
+    res.json(ensureArviBranding(invoice));
   } catch (error) {
     res.status(500).json({ error: 'Error al finalizar factura' });
   }
@@ -422,14 +472,11 @@ router.post('/:id/duplicate', async (req, res) => {
       return res.status(404).json({ error: 'Factura no encontrada' });
     }
     
-    const year = new Date().getFullYear();
-    const count = await prisma.invoice.count({
-      where: { invoiceNumber: { startsWith: `${year}/` } }
-    });
+    const duplicateNumber = await getNextSequentialInvoiceNumber(original.date || new Date());
     
     const duplicate = await prisma.invoice.create({
       data: {
-        invoiceNumber: `${year}/${(count + 1).toString().padStart(4, '0')}`,
+        invoiceNumber: duplicateNumber,
         date: new Date(),
         dueDate: original.dueDate,
         client: original.client,
@@ -457,7 +504,7 @@ router.post('/:id/duplicate', async (req, res) => {
       include: { items: true }
     });
     
-    res.status(201).json(duplicate);
+    res.status(201).json(ensureArviBranding(duplicate));
   } catch (error) {
     res.status(500).json({ error: 'Error al duplicar factura' });
   }

@@ -6,6 +6,7 @@ import { useAccounting } from '../../context/AccountingContext';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { emitToast } from '../../utils/toast';
+import { formatDate } from '../../utils/dates';
 import api from '../../services/api';
 import './Parts.css';
 
@@ -345,7 +346,7 @@ export const Parts = () => {
                                             </div>
                                             <div>
                                                 <div style={{ fontWeight: '600', color: 'var(--text-main)' }}>{part.client}</div>
-                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{part.date} • {part.work}</div>
+                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{formatDate(part.date, '-')} • {part.work}</div>
                                             </div>
                                         </div>
                                         <div>
@@ -382,7 +383,7 @@ export const Parts = () => {
                                         </div>
                                         <div>
                                             <div style={{ fontWeight: '600' }}>{budget.client}</div>
-                                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{budget.date} • {t('parts.total')}: <span style={{ color: 'var(--brand-green)', fontWeight: '700' }}>{budget.total} €</span></div>
+                                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{formatDate(budget.date, '-')} • {t('parts.total')}: <span style={{ color: 'var(--brand-green)', fontWeight: '700' }}>{budget.total} €</span></div>
                                         </div>
                                     </div>
                                     <div>
