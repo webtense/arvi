@@ -7,6 +7,7 @@ import { useClients } from '../../context/ClientsContext';
 import { useSettings } from '../../context/SettingsContext';
 import api from '../../services/api';
 import { emitToast } from '../../utils/toast';
+import './Budgets.css';
 
 const makeLine = (description = '', quantity = 1, unitPrice = 0, category = 'general') => ({
   description,
@@ -172,7 +173,7 @@ export const Budgets = () => {
           <div style={{ display: 'grid', gap: 8 }}>
             <strong>Lineas adicionales</strong>
             {extraLines.map((line, idx) => (
-              <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr auto', gap: 8 }}>
+              <div key={idx} className="budget-extra-line-grid">
                 <input className="form-control" placeholder="Descripcion" value={line.description} onChange={(e) => setExtraLines((prev) => prev.map((l, i) => (i === idx ? { ...l, description: e.target.value } : l)))} />
                 <input className="form-control" type="number" value={line.quantity} onChange={(e) => setExtraLines((prev) => prev.map((l, i) => (i === idx ? { ...l, quantity: Number(e.target.value) } : l)))} />
                 <input className="form-control" type="number" value={line.unitPrice} onChange={(e) => setExtraLines((prev) => prev.map((l, i) => (i === idx ? { ...l, unitPrice: Number(e.target.value) } : l)))} />
@@ -196,7 +197,31 @@ export const Budgets = () => {
       </Card>
 
       <Card title="Listado de presupuestos" style={{ marginTop: 16 }}>
-        <div style={{ overflowX: 'auto' }}>
+        <div className="budget-cards-list">
+          {budgets.map((budget) => (
+            <Card key={budget.id} className="budget-mobile-card">
+              <div className="budget-mobile-head">
+                <div>
+                  <p className="budget-number">{budget.budgetNumber || `B-${budget.id}`}</p>
+                  <h3>{budget.client}</h3>
+                </div>
+                <span className="budget-status-chip">{budget.status}</span>
+              </div>
+              <div className="budget-mobile-meta">
+                <span><strong>Total</strong>{Number(budget.total || 0).toFixed(2)} EUR</span>
+                <span><strong>Email</strong>{budget.clientEmail || '-'}</span>
+              </div>
+              <div className="budget-actions-wrap">
+                <Button variant="secondary" onClick={() => sendBudget(budget.id)}><Send size={14} /> Enviar</Button>
+                <Button variant="secondary" onClick={() => acceptBudget(budget.id)}><CheckCircle2 size={14} /> Aceptar</Button>
+                <Button variant="secondary" onClick={() => convertToInvoice(budget)}>Pasar a factura</Button>
+                <Button variant="secondary" onClick={() => window.open(api.getBudgetPdfUrl(budget.id), '_blank', 'noopener,noreferrer')}><FileText size={14} /> PDF</Button>
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        <div className="budget-table-desktop" style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
@@ -219,6 +244,7 @@ export const Budgets = () => {
                     <Button variant="secondary" onClick={() => sendBudget(budget.id)}><Send size={14} /> Enviar</Button>
                     <Button variant="secondary" onClick={() => acceptBudget(budget.id)}><CheckCircle2 size={14} /> Aceptar</Button>
                     <Button variant="secondary" onClick={() => convertToInvoice(budget)}>Pasar a factura</Button>
+                    <Button variant="secondary" onClick={() => window.open(api.getBudgetPdfUrl(budget.id), '_blank', 'noopener,noreferrer')}><FileText size={14} /> PDF</Button>
                     <Button variant="secondary" onClick={() => window.open(`mailto:${budget.clientEmail || ''}`)}><Mail size={14} /></Button>
                   </td>
                 </tr>

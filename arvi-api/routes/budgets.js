@@ -4,9 +4,17 @@ const authMiddleware = require('../middleware/auth');
 const messages = require('../lib/errors');
 const { sanitizeString, validateEmail } = require('../lib/validation');
 const { sendMail } = require('../lib/mailer');
+const { generateBudgetPdf } = require('../lib/pdf');
+const path = require('path');
 
 const router = Router();
 const authorizeRoles = authMiddleware.authorizeRoles;
+
+const buildDraftInvoiceNumber = (referenceDate = new Date(), seed = Date.now()) => {
+  const date = referenceDate instanceof Date ? referenceDate : new Date(referenceDate);
+  const year = Number.isNaN(date.getTime()) ? new Date().getFullYear() : date.getFullYear();
+  return `DRAFT-${year}-${String(seed).padStart(6, '0')}`;
+};
 
 router.use(authMiddleware, authorizeRoles('admin'));
 
@@ -86,6 +94,22 @@ router.get('/:id', async (req, res) => {
     res.json(budget);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener presupuesto' });
+  }
+});
+
+router.get('/:id/pdf', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const budget = await prisma.budget.findUnique({
+      where: { id },
+      include: { items: true, project: true },
+    });
+    if (!budget) return res.status(404).json({ error: 'Presupuesto no encontrado' });
+
+    const pdfPath = await generateBudgetPdf(budget, path.join(__dirname, '..', 'storage', 'budgets-pdf'));
+    return res.download(pdfPath, `${budget.budgetNumber || `proforma-${budget.id}`}.pdf`);
+  } catch (error) {
+    return res.status(500).json({ error: 'Error al generar PDF del presupuesto' });
   }
 });
 
@@ -230,6 +254,8 @@ router.post('/:id/send', async (req, res) => {
     }
 
     if (recipients.length > 0) {
+      const budgetWithItems = await prisma.budget.findUnique({ where: { id: budget.id }, include: { items: true } });
+      const pdfPath = await generateBudgetPdf(budgetWithItems, path.join(__dirname, '..', 'storage', 'budgets-pdf'));
       await sendMail({
         to: recipients.join(','),
         subject: `Presupuesto ${budget.budgetNumber}`,
@@ -240,6 +266,7 @@ Total estimado: ${Number(budget.total || 0).toFixed(2)} EUR.
 
 Gracias,
 ARVI`,
+        attachments: [{ filename: `${budget.budgetNumber}.pdf`, path: pdfPath }],
       });
     }
 
@@ -255,12 +282,9 @@ router.post('/:id/to-invoice', async (req, res) => {
     const budget = await prisma.budget.findUnique({ where: { id }, include: { items: true } });
     if (!budget) return res.status(404).json({ error: 'Presupuesto no encontrado' });
 
-    const year = new Date().getFullYear();
-    const count = await prisma.invoice.count({ where: { invoiceNumber: { startsWith: `${year}/` } } });
-
     const invoice = await prisma.invoice.create({
       data: {
-        invoiceNumber: `${year}/${String(count + 1).padStart(4, '0')}`,
+        invoiceNumber: buildDraftInvoiceNumber(new Date(), Date.now()),
         date: new Date(),
         clientName: budget.client,
         clientCif: budget.clientCif,
@@ -272,6 +296,7 @@ router.post('/:id/to-invoice', async (req, res) => {
         total: budget.total,
         status: 'draft',
         type: 'draft',
+        paymentStatus: 'pending',
         items: {
           create: budget.items.map((item) => ({
             description: item.description,

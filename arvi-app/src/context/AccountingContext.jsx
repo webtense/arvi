@@ -28,13 +28,13 @@ export const AccountingProvider = ({ children }) => {
                 return;
             }
 
-            const [invoicesData, budgetsData, partsData] = await Promise.all([
+            const [invoicesResponse, budgetsData, partsData] = await Promise.all([
                 api.getInvoices(),
                 api.getBudgets(),
                 api.getParts()
             ]);
 
-            setInvoices(invoicesData || []);
+            setInvoices(invoicesResponse?.data || []);
             setBudgets(budgetsData || []);
             setParts(partsData || []);
         } catch (error) {
@@ -193,6 +193,42 @@ export const AccountingProvider = ({ children }) => {
         }
     };
 
+    const updateInvoice = async (id, changes) => {
+        try {
+            const updated = await api.updateInvoice(id, changes);
+            setInvoices(prev => prev.map(inv => inv.id === id ? updated : inv));
+            emitToast({ type: 'success', message: 'Factura actualizada correctamente.' });
+            return updated;
+        } catch (error) {
+            setInvoices(prev => prev.map(inv => inv.id === id ? { ...inv, ...changes } : inv));
+            emitToast({ type: 'info', message: 'Cambios guardados en local. Pendiente de sincronizar.' });
+            return { id, ...changes };
+        }
+    };
+
+    const duplicateInvoice = async (id) => {
+        try {
+            const duplicated = await api.duplicateInvoice(id);
+            setInvoices(prev => [duplicated, ...prev]);
+            emitToast({ type: 'success', message: 'Factura duplicada.' });
+            return duplicated;
+        } catch (error) {
+            emitToast({ type: 'error', message: error.message || 'No se pudo duplicar la factura.' });
+            throw error;
+        }
+    };
+
+    const deleteInvoice = async (id) => {
+        try {
+            await api.deleteInvoice(id);
+            setInvoices(prev => prev.filter(inv => inv.id !== id));
+            emitToast({ type: 'success', message: 'Factura eliminada.' });
+        } catch (error) {
+            emitToast({ type: 'error', message: error.message || 'No se pudo eliminar la factura.' });
+            throw error;
+        }
+    };
+
     const importInvoices = (importedData) => {
         setInvoices(prev => {
             const existingNumbers = new Set(prev.map(inv => inv.invoiceNumber));
@@ -211,7 +247,10 @@ export const AccountingProvider = ({ children }) => {
             finalizeInvoice,
             importInvoices,
             addPart,
-            addInvoice
+            addInvoice,
+            updateInvoice,
+            duplicateInvoice,
+            deleteInvoice
         }}>
             {children}
         </AccountingContext.Provider>

@@ -95,9 +95,13 @@ class ApiService {
   }
 
   // Invoices
-  async getInvoices() {
-    const data = await this.request('/invoices');
-    return this.normalizeListResponse(data);
+  async getInvoices(filters = {}) {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && String(value).trim() !== '') params.set(key, value);
+    });
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return this.request(`/invoices${query}`);
   }
 
   async createInvoice(invoice) {
@@ -137,6 +141,10 @@ class ApiService {
     return this.request(`/invoices/${id}/duplicate`, {
       method: 'POST',
     });
+  }
+
+  getInvoicePdfUrl(id) {
+    return `${this.baseUrl}/invoices/${id}/pdf`;
   }
 
   // Clients
@@ -200,6 +208,10 @@ class ApiService {
     return this.request(`/budgets/${id}/send`, {
       method: 'POST',
     });
+  }
+
+  getBudgetPdfUrl(id) {
+    return `${this.baseUrl}/budgets/${id}/pdf`;
   }
 
   async acceptBudget(id) {
